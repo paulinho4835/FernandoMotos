@@ -1,39 +1,114 @@
 import { createClient } from '@/lib/supabase/server'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SalesTable } from '@/components/historial/SalesTable'
+import { formatBOB } from '@/lib/utils/formatCurrency'
+import { ShoppingBag, TrendingUp, DollarSign } from 'lucide-react'
+
+// Bolivia is UTC-4 (no DST)
+function getTodayBOT() {
+  const now = new Date()
+  const bot = new Date(now.getTime() - 4 * 60 * 60 * 1000)
+  return bot.toISOString().split('T')[0] // YYYY-MM-DD
+}
+
+function isToday(dateStr: string) {
+  const d = new Date(new Date(dateStr).getTime() - 4 * 60 * 60 * 1000)
+  return d.toISOString().split('T')[0] === getTodayBOT()
+}
 
 export default async function HistorialPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const { data: perfil } = await supabase
     .from('perfiles').select('rol').eq('id', user!.id).single()
+  const isAdmin = perfil?.rol === 'admin'
 
   const query = supabase
     .from('ventas')
     .select('*, clientes(nombre), perfiles(nombre)')
-    .order('created_at', { ascending: false })
-    .limit(100)
+    .order('created_at', { ascending: true })
 
-  const { data: ventas } = perfil?.rol === 'admin'
+  const { data: ventas } = isAdmin
     ? await query
     : await query.eq('vendedor_id', user!.id)
 
   const all = ventas ?? []
-  const repuestos = all.filter(v => v.tipo_venta === 'repuesto')
-  const motos = all.filter(v => v.tipo_venta === 'moto')
+  const hoy = all.filter(v => isToday(v.created_at))
+  const anteriores = all.filter(v => !isToday(v.created_at))
+
+  const repuestosHoy = hoy.filter(v => v.tipo_venta === 'repuesto')
+  const motosHoy = hoy.filter(v => v.tipo_venta === 'moto')
+  const repuestosAnt = anteriores.filter(v => v.tipo_venta === 'repuesto')
+  const motosAnt = anteriores.filter(v => v.tipo_venta === 'moto')
+
+  const totalHoy = hoy.reduce((s, v) => s + (v.total ?? 0), 0)
+  const gananciaHoy = hoy.reduce((s, v) => s + (v.ganancia_neta ?? 0), 0)
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Historial de Ventas</h1>
+
+      {/* Resumen del día */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-xl border bg-white p-4 flex items-center gap-3">
+          <div className="bg-blue-100 rounded-lg p-2">
+            <ShoppingBag size={20} className="text-blue-600" />
+          </div>
+          <div>
+            <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Ventas hoy</p>
+            <p className="text-2xl font-bold">{hoy.length}</p>
+          </div>
+        </div>
+        <div className="rounded-xl border bg-white p-4 flex items-center gap-3">
+          <div className="bg-slate-100 rounded-lg p-2">
+            <DollarSign size={20} className="text-slate-600" />
+          </div>
+          <div>
+            <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Total hoy</p>
+            <p className="text-2xl font-bold">{formatBOB(totalHoy)}</p>
+          </div>
+        </div>
+        {isAdmin && (
+          <div className="rounded-xl border bg-white p-4 flex items-center gap-3">
+            <div className="bg-green-100 rounded-lg p-2">
+              <TrendingUp size={20} className="text-green-600" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Ganancia hoy</p>
+              <p className="text-2xl font-bold text-green-600">{formatBOB(gananciaHoy)}</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Tabs */}
       <Tabs defaultValue="total">
         <TabsList>
           <TabsTrigger value="total">Total ({all.length})</TabsTrigger>
-          <TabsTrigger value="repuestos">Repuestos ({repuestos.length})</TabsTrigger>
-          <TabsTrigger value="motos">Motos ({motos.length})</TabsTrigger>
+          <TabsTrigger value="repuestos">Repuestos ({repuestosHoy.length + repuestosAnt.length})</TabsTrigger>
+          <TabsTrigger value="motos">Motos ({motosHoy.length + motosAnt.length})</TabsTrigger>
         </TabsList>
-        <TabsContent value="total"><SalesTable ventas={all} /></TabsContent>
-        <TabsContent value="repuestos"><SalesTable ventas={repuestos} /></TabsContent>
-        <TabsContent value="motos"><SalesTable ventas={motos} /></TabsContent>
+
+        <TabsContent value="total" className="space-y-6 mt-4">
+          <SalesTable ventas={hoy} title="Ventas de hoy" isAdmin={isAdmin} />
+          {anteriores.length > 0 && (
+            <SalesTable ventas={anteriores} title="Ventas anteriores" isAdmin={isAdmin} />
+          )}
+        </TabsContent>
+
+        <TabsContent value="repuestos" className="space-y-6 mt-4">
+          <SalesTable ventas={repuestosHoy} title="Ventas de hoy" isAdmin={isAdmin} />
+          {repuestosAnt.length > 0 && (
+            <SalesTable ventas={repuestosAnt} title="Ventas anteriores" isAdmin={isAdmin} />
+          )}
+        </TabsContent>
+
+        <TabsContent value="motos" className="space-y-6 mt-4">
+          <SalesTable ventas={motosHoy} title="Ventas de hoy" isAdmin={isAdmin} />
+          {motosAnt.length > 0 && (
+            <SalesTable ventas={motosAnt} title="Ventas anteriores" isAdmin={isAdmin} />
+          )}
+        </TabsContent>
       </Tabs>
     </div>
   )
