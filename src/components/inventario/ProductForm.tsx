@@ -142,7 +142,7 @@ export function ProductForm({ producto, categorias = [] }: Props) {
       <div className="space-y-4">
         <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Identificación</h2>
         {[
-          { label: 'Código (SKU)', field: 'codigo', required: true },
+          { label: 'Código', field: 'codigo', required: true },
           { label: 'Nombre',       field: 'nombre' },
           { label: 'Descripción',  field: 'descripcion' },
         ].map(({ label, field, required }) => (
