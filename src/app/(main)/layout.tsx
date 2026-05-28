@@ -20,13 +20,13 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   const isAdmin = perfil?.rol === 'admin'
 
   const navItems = [
-    ...(isAdmin ? [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }] : []),
     { href: '/inventario', label: 'Repuestos', icon: Package },
-    ...(isAdmin ? [{ href: '/categorias', label: 'Categorías', icon: Tag }] : []),
     { href: '/inventario/motos', label: 'Motos', icon: Bike },
-    { href: '/caja', label: 'Caja', icon: ShoppingCart },
     { href: '/historial', label: 'Ventas', icon: History },
+    { href: '/caja', label: 'Caja', icon: ShoppingCart },
+    ...(isAdmin ? [{ href: '/categorias', label: 'Categorías', icon: Tag }] : []),
     { href: '/clientes', label: 'Clientes', icon: Users },
+    ...(isAdmin ? [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }] : []),
   ]
 
   async function signOut() {

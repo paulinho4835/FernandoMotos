@@ -20,6 +20,9 @@ interface Props {
 export function InventarioClient({ productos, categorias, isAdmin, vendedorId, vendedorNombre }: Props) {
   const [activeTab, setActiveTab] = useState<string>('todos')
   const [search, setSearch] = useState('')
+  const [filterMedInt, setFilterMedInt] = useState('')
+  const [filterMedExt, setFilterMedExt] = useState('')
+  const [filterAltura, setFilterAltura] = useState('')
 
   // Pending product for adding to cart
   const [pending, setPending] = useState<Producto | null>(null)
@@ -87,8 +90,21 @@ export function InventarioClient({ productos, categorias, isAdmin, vendedorId, v
       )
     }
 
+    if (filterMedInt.trim()) {
+      const q = filterMedInt.toLowerCase().trim()
+      list = list.filter(p => (p.medida_interna ?? '').toLowerCase().includes(q))
+    }
+    if (filterMedExt.trim()) {
+      const q = filterMedExt.toLowerCase().trim()
+      list = list.filter(p => (p.medida_externa ?? '').toLowerCase().includes(q))
+    }
+    if (filterAltura.trim()) {
+      const q = filterAltura.toLowerCase().trim()
+      list = list.filter(p => (p.altura ?? '').toLowerCase().includes(q))
+    }
+
     return list
-  }, [productos, activeTab, search])
+  }, [productos, activeTab, search, filterMedInt, filterMedExt, filterAltura])
 
   const sinCategoria = productos.filter(p => !p.categoria_id).length
   const categoriasCon = categorias.filter(c => productos.some(p => p.categoria_id === c.id))
@@ -96,21 +112,65 @@ export function InventarioClient({ productos, categorias, isAdmin, vendedorId, v
 
   return (
     <div className="space-y-4 pb-24">
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <div className="relative w-full sm:max-w-xs">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <Input
-            placeholder="Buscar código, nombre, compatibilidad..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="pl-9"
-          />
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+          <div className="relative w-full sm:max-w-xs">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Input
+              placeholder="Buscar código, nombre, compatibilidad..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          {(search || filterMedInt || filterMedExt || filterAltura) && (
+            <p className="text-sm text-slate-500">
+              {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
+            </p>
+          )}
         </div>
-        {search && (
-          <p className="text-sm text-slate-500">
-            {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
-          </p>
-        )}
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-xs font-medium text-slate-500 whitespace-nowrap">Filtrar por medidas:</span>
+          <div className="relative">
+            <Input
+              placeholder="Med. interna"
+              value={filterMedInt}
+              onChange={e => setFilterMedInt(e.target.value)}
+              className="w-32 h-8 text-xs pr-6"
+            />
+            {filterMedInt && (
+              <button onClick={() => setFilterMedInt('')} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <X size={12} />
+              </button>
+            )}
+          </div>
+          <div className="relative">
+            <Input
+              placeholder="Med. externa"
+              value={filterMedExt}
+              onChange={e => setFilterMedExt(e.target.value)}
+              className="w-32 h-8 text-xs pr-6"
+            />
+            {filterMedExt && (
+              <button onClick={() => setFilterMedExt('')} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <X size={12} />
+              </button>
+            )}
+          </div>
+          <div className="relative">
+            <Input
+              placeholder="Altura"
+              value={filterAltura}
+              onChange={e => setFilterAltura(e.target.value)}
+              className="w-28 h-8 text-xs pr-6"
+            />
+            {filterAltura && (
+              <button onClick={() => setFilterAltura('')} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <X size={12} />
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="flex gap-1.5 flex-wrap">
