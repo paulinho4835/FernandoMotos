@@ -4,11 +4,15 @@ import { formatBOB } from '@/lib/utils/formatCurrency'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Edit } from 'lucide-react'
+import { Edit, ShoppingCart } from 'lucide-react'
 
-interface Props { motos: Moto[] }
+interface Props {
+  motos: Moto[]
+  isAdmin?: boolean
+  onAddToCart?: (m: Moto) => void
+}
 
-export function MotoTable({ motos }: Props) {
+export function MotoTable({ motos, isAdmin = false, onAddToCart }: Props) {
   return (
     <div className="rounded-md border overflow-hidden">
       <table className="w-full text-sm">
@@ -19,7 +23,7 @@ export function MotoTable({ motos }: Props) {
             <th className="text-left p-3">Año</th>
             <th className="text-left p-3">Color</th>
             <th className="text-left p-3">Stock</th>
-            <th className="text-left p-3">Precio</th>
+            <th className="text-left p-3">Precio Referencial</th>
             <th className="p-3" />
           </tr>
         </thead>
@@ -40,9 +44,18 @@ export function MotoTable({ motos }: Props) {
               </td>
               <td className="p-3">{formatBOB(m.precio_venta)}</td>
               <td className="p-3">
-                <Button asChild size="sm" variant="ghost">
-                  <Link href={`/inventario/motos/${m.id}/editar`}><Edit size={14} /></Link>
-                </Button>
+                <div className="flex items-center gap-1">
+                  {onAddToCart && (
+                    <Button size="sm" variant="ghost" title="Vender moto" onClick={() => onAddToCart(m)}>
+                      <ShoppingCart size={14} className="text-green-600" />
+                    </Button>
+                  )}
+                  {isAdmin && (
+                    <Button asChild size="sm" variant="ghost">
+                      <Link href={`/inventario/motos/${m.id}/editar`}><Edit size={14} /></Link>
+                    </Button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}

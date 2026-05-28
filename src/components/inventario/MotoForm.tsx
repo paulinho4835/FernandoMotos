@@ -75,7 +75,7 @@ export function MotoForm({ moto }: Props) {
     { label: 'Nº Motor', field: 'numero_motor', type: 'text' },
     { label: 'Nº Chasis', field: 'numero_chasis', type: 'text' },
     { label: 'Costo (Bs.)', field: 'costo', type: 'number', required: true },
-    { label: 'Precio de Venta (Bs.)', field: 'precio_venta', type: 'number', required: true },
+    { label: 'Precio Referencial (Bs.)', field: 'precio_venta', type: 'number', required: true },
     { label: 'Stock actual', field: 'stock', type: 'number', required: true },
     { label: 'Stock mínimo', field: 'stock_minimo', type: 'number', required: true },
     { label: 'Descripción', field: 'descripcion', type: 'text' },

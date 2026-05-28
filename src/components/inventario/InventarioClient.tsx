@@ -80,6 +80,9 @@ export function InventarioClient({ productos, categorias, isAdmin, vendedorId, v
         p.codigo.toLowerCase().includes(q) ||
         (p.nombre ?? '').toLowerCase().includes(q) ||
         (p.descripcion ?? '').toLowerCase().includes(q) ||
+        (p.medida_interna ?? '').toLowerCase().includes(q) ||
+        (p.medida_externa ?? '').toLowerCase().includes(q) ||
+        (p.altura ?? '').toLowerCase().includes(q) ||
         p.compatibilidad.some(c => c.toLowerCase().includes(q))
       )
     }

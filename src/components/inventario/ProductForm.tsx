@@ -6,6 +6,7 @@ import type { Producto, Categoria } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Plus, Check, X } from 'lucide-react'
 
 interface Props { producto?: Producto; categorias?: Categoria[] }
 
@@ -14,6 +15,29 @@ export function ProductForm({ producto, categorias = [] }: Props) {
   const isEdit = Boolean(producto)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // local categories state so newly created ones appear immediately
+  const [localCategorias, setLocalCategorias] = useState<Categoria[]>(categorias)
+  const [addingCat, setAddingCat] = useState(false)
+  const [newCatNombre, setNewCatNombre] = useState('')
+  const [savingCat, setSavingCat] = useState(false)
+
+  async function handleAddCategoria() {
+    const nombre = newCatNombre.trim()
+    if (!nombre) return
+    setSavingCat(true)
+    const supabase = createClient()
+    const { data, error: err } = await supabase
+      .from('categorias').insert({ nombre }).select('id, nombre').single()
+    if (!err && data) {
+      setLocalCategorias(prev => [...prev, data as Categoria])
+      set('categoria_id', data.id)
+    }
+    setNewCatNombre('')
+    setAddingCat(false)
+    setSavingCat(false)
+  }
+
   const [form, setForm] = useState({
     codigo:             producto?.codigo ?? '',
     nombre:             producto?.nombre ?? '',
@@ -71,21 +95,48 @@ export function ProductForm({ producto, categorias = [] }: Props) {
     <form onSubmit={handleSubmit} className="space-y-6 max-w-lg">
 
       {/* Categoría */}
-      {categorias.length > 0 && (
-        <div className="space-y-1">
+      <div className="space-y-1">
+        <div className="flex items-center justify-between">
           <Label>Categoría <span className="text-xs text-slate-400">(opcional)</span></Label>
-          <select
-            value={form.categoria_id}
-            onChange={e => set('categoria_id', e.target.value)}
-            className="w-full border rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
-          >
-            <option value="">— Sin categoría —</option>
-            {categorias.map(c => (
-              <option key={c.id} value={c.id}>{c.nombre}</option>
-            ))}
-          </select>
+          {!addingCat && (
+            <button
+              type="button"
+              onClick={() => setAddingCat(true)}
+              className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 transition-colors"
+            >
+              <Plus size={13} />Nueva categoría
+            </button>
+          )}
         </div>
-      )}
+        <select
+          value={form.categoria_id}
+          onChange={e => set('categoria_id', e.target.value)}
+          className="w-full border rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
+        >
+          <option value="">— Sin categoría —</option>
+          {localCategorias.map(c => (
+            <option key={c.id} value={c.id}>{c.nombre}</option>
+          ))}
+        </select>
+        {addingCat && (
+          <div className="flex gap-2 items-center pt-1">
+            <Input
+              autoFocus
+              placeholder="Nombre de la categoría"
+              value={newCatNombre}
+              onChange={e => setNewCatNombre(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddCategoria() } if (e.key === 'Escape') { setAddingCat(false); setNewCatNombre('') } }}
+              className="h-8 text-sm"
+            />
+            <Button type="button" size="sm" variant="ghost" className="h-8 w-8 p-0" disabled={savingCat} onClick={handleAddCategoria}>
+              <Check size={14} className="text-green-600" />
+            </Button>
+            <Button type="button" size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => { setAddingCat(false); setNewCatNombre('') }}>
+              <X size={14} className="text-slate-400" />
+            </Button>
+          </div>
+        )}
+      </div>
 
       {/* Identificación */}
       <div className="space-y-4">
