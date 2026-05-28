@@ -4,13 +4,18 @@ import { createClient } from '@/lib/supabase/client'
 import { useCartStore } from '@/lib/store/cartStore'
 import type { Producto } from '@/lib/types'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { formatBOB } from '@/lib/utils/formatCurrency'
-import { Search } from 'lucide-react'
+import { Search, X, ShoppingCart } from 'lucide-react'
 
 export function ProductSearch() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Producto[]>([])
+  const [pending, setPending] = useState<Producto | null>(null)
+  const [precio, setPrecio] = useState('')
+  const [cantidad, setCantidad] = useState('1')
   const addItem = useCartStore(s => s.addItem)
+  const updateQuantity = useCartStore(s => s.updateQuantity)
 
   const search = useCallback(async (q: string) => {
     if (q.length < 2) { setResults([]); return }
@@ -32,21 +37,38 @@ export function ProductSearch() {
     w.__searchTimer = setTimeout(() => search(e.target.value), 300)
   }
 
-  function select(p: Producto) {
-    addItem({
-      producto_id: p.id,
-      codigo: p.codigo,
-      nombre: p.nombre,
-      precio_unitario: p.precio_venta,
-      costo_unitario: p.costo,
-      stock: p.stock,
-    })
+  function selectProduct(p: Producto) {
+    setPending(p)
+    setPrecio(p.precio_referencial?.toString() ?? p.precio_venta?.toString() ?? '')
+    setCantidad('1')
     setQuery('')
     setResults([])
   }
 
+  function confirmAdd() {
+    if (!pending) return
+    const precioNum = parseFloat(precio)
+    const cantNum = parseInt(cantidad) || 1
+    if (!precioNum || precioNum <= 0) return
+    addItem({
+      producto_id: pending.id,
+      codigo: pending.codigo,
+      nombre: pending.nombre,
+      precio_unitario: precioNum,
+      costo_unitario: pending.costo,
+      stock: pending.stock,
+    })
+    if (cantNum > 1) updateQuantity(pending.id, cantNum)
+    setPending(null)
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') confirmAdd()
+    if (e.key === 'Escape') setPending(null)
+  }
+
   return (
-    <div className="relative">
+    <div className="space-y-2">
       <div className="relative">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
         <Input
@@ -55,33 +77,81 @@ export function ProductSearch() {
           onChange={handleChange}
           className="pl-9"
         />
-      </div>
-      {results.length > 0 && (
-        <div className="absolute z-10 top-full mt-1 w-full bg-white border rounded-md shadow-lg max-h-64 overflow-auto">
-          {results.map(p => (
-            <button key={p.id} onClick={() => select(p)}
-              className="w-full text-left px-4 py-2 hover:bg-slate-50 flex justify-between items-center">
-              <div>
-                <p className="font-medium text-sm">{p.nombre}</p>
-                <p className="text-xs text-slate-500">
-                  {p.codigo} · Stock: {p.stock}
-                  {(p.medida_interna || p.medida_externa || p.altura) && (
-                    <> · {[
-                      p.medida_interna && `Int: ${p.medida_interna}`,
-                      p.medida_externa && `Ext: ${p.medida_externa}`,
-                      p.altura && `Alt: ${p.altura}`,
-                    ].filter(Boolean).join(' / ')}</>
-                  )}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-semibold">{formatBOB(p.precio_venta)}</p>
+        {results.length > 0 && (
+          <div className="absolute z-10 top-full mt-1 w-full bg-white border rounded-md shadow-lg max-h-64 overflow-auto">
+            {results.map(p => (
+              <button key={p.id} onClick={() => selectProduct(p)}
+                className="w-full text-left px-4 py-2 hover:bg-slate-50 flex justify-between items-center">
+                <div>
+                  <p className="font-medium text-sm">{p.nombre || p.codigo}</p>
+                  <p className="text-xs text-slate-500">
+                    {p.codigo} · Stock: {p.stock}
+                    {(p.medida_interna || p.medida_externa || p.altura) && (
+                      <> · {[
+                        p.medida_interna && `Int: ${p.medida_interna}`,
+                        p.medida_externa && `Ext: ${p.medida_externa}`,
+                        p.altura && `Alt: ${p.altura}`,
+                      ].filter(Boolean).join(' / ')}</>
+                    )}
+                  </p>
+                </div>
                 {p.precio_referencial && (
-                  <p className="text-xs text-slate-400">Ref: {formatBOB(p.precio_referencial)}</p>
+                  <p className="text-xs text-slate-400 shrink-0 ml-2">Ref: {formatBOB(p.precio_referencial)}</p>
                 )}
-              </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {pending && (
+        <div className="border border-blue-200 rounded-md p-3 bg-blue-50 space-y-3">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="font-medium text-sm">{pending.nombre || pending.codigo}</p>
+              <p className="text-xs text-slate-500">{pending.codigo} · Stock: {pending.stock}</p>
+            </div>
+            <button onClick={() => setPending(null)} className="text-slate-400 hover:text-slate-600 mt-0.5">
+              <X size={16} />
             </button>
-          ))}
+          </div>
+          <div className="flex gap-2 items-end">
+            <div className="flex-1 space-y-1">
+              <label className="text-xs font-medium text-slate-600">Precio de venta (Bs.)</label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0.01"
+                placeholder={pending.precio_referencial ? `Referencial: ${pending.precio_referencial}` : 'Ingrese precio'}
+                value={precio}
+                onChange={e => setPrecio(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="h-8 text-sm"
+                autoFocus
+              />
+            </div>
+            <div className="w-20 space-y-1">
+              <label className="text-xs font-medium text-slate-600">Cantidad</label>
+              <Input
+                type="number"
+                min="1"
+                max={pending.stock}
+                value={cantidad}
+                onChange={e => setCantidad(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="h-8 text-sm text-center"
+              />
+            </div>
+            <Button
+              size="sm"
+              onClick={confirmAdd}
+              disabled={!precio || parseFloat(precio) <= 0}
+              className="h-8"
+            >
+              <ShoppingCart size={14} className="mr-1" />
+              Agregar
+            </Button>
+          </div>
         </div>
       )}
     </div>

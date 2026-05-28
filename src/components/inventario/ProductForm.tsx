@@ -45,7 +45,7 @@ export function ProductForm({ producto, categorias = [] }: Props) {
       nombre:             form.nombre,
       descripcion:        form.descripcion || null,
       costo:              parseFloat(form.costo),
-      precio_venta:       parseFloat(form.precio_venta),
+      precio_venta:       form.precio_venta ? parseFloat(form.precio_venta) : 0,
       precio_referencial: form.precio_referencial ? parseFloat(form.precio_referencial) : null,
       stock:              parseInt(form.stock),
       stock_minimo:       parseInt(form.stock_minimo),
@@ -92,7 +92,7 @@ export function ProductForm({ producto, categorias = [] }: Props) {
         <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Identificación</h2>
         {[
           { label: 'Código (SKU)', field: 'codigo', required: true },
-          { label: 'Nombre',       field: 'nombre',  required: true },
+          { label: 'Nombre',       field: 'nombre' },
           { label: 'Descripción',  field: 'descripcion' },
         ].map(({ label, field, required }) => (
           <div key={field} className="space-y-1">
@@ -133,8 +133,9 @@ export function ProductForm({ producto, categorias = [] }: Props) {
           <p className="text-xs text-slate-400">Guía para vendedores. No es el precio definitivo.</p>
         </div>
         <div className="space-y-1">
-          <Label>Precio de venta (Bs.) <span className="text-red-500">*</span></Label>
-          <Input type="number" step="0.01" value={form.precio_venta} onChange={e => set('precio_venta', e.target.value)} required />
+          <Label>Precio de venta (Bs.) <span className="text-xs text-slate-400">(opcional)</span></Label>
+          <Input type="number" step="0.01" value={form.precio_venta} onChange={e => set('precio_venta', e.target.value)} />
+          <p className="text-xs text-slate-400">Podés definirlo al momento de realizar la venta.</p>
         </div>
       </div>
 
@@ -142,14 +143,18 @@ export function ProductForm({ producto, categorias = [] }: Props) {
       <div className="space-y-4">
         <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Inventario</h2>
         {[
-          { label: 'Stock actual',    field: 'stock',        required: true },
-          { label: 'Stock mínimo',    field: 'stock_minimo', required: true },
+          { label: 'Stock actual', field: 'stock', required: true },
         ].map(({ label, field, required }) => (
           <div key={field} className="space-y-1">
             <Label>{label}{required && <span className="text-red-500 ml-1">*</span>}</Label>
             <Input type="number" value={form[field as keyof typeof form]} onChange={e => set(field, e.target.value)} required={required} />
           </div>
         ))}
+        <div className="space-y-1">
+          <Label>Stock mínimo <span className="text-xs text-slate-400">(opcional)</span></Label>
+          <Input type="number" min="0" value={form.stock_minimo} onChange={e => set('stock_minimo', e.target.value)} />
+          <p className="text-xs text-slate-400">Cuando el stock baje de este número, aparece una alerta "Crítico" en el inventario. Dejá en 0 para no usar alertas.</p>
+        </div>
         <div className="space-y-1">
           <Label>Ubicación <span className="text-xs text-slate-400">(ej: Estante A-3)</span></Label>
           <Input value={form.ubicacion} onChange={e => set('ubicacion', e.target.value)} />

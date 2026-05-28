@@ -6,6 +6,7 @@ interface CartStore {
   addItem: (item: Omit<CartItemRepuesto, 'cantidad'>) => void
   removeItem: (producto_id: string) => void
   updateQuantity: (producto_id: string, cantidad: number) => void
+  updatePrice: (producto_id: string, precio: number) => void
   clear: () => void
   total: () => number
   ganancia: () => number
@@ -33,6 +34,9 @@ export const useCartStore = create<CartStore>((set, get) => ({
     items: state.items
       .map(i => i.producto_id === producto_id ? { ...i, cantidad } : i)
       .filter(i => i.cantidad > 0),
+  })),
+  updatePrice: (producto_id, precio) => set((state) => ({
+    items: state.items.map(i => i.producto_id === producto_id ? { ...i, precio_unitario: precio } : i),
   })),
   clear: () => set({ items: [] }),
   total: () => get().items.reduce((s, i) => s + i.precio_unitario * i.cantidad, 0),
