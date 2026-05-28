@@ -153,7 +153,7 @@ export function ProductForm({ producto, categorias = [] }: Props) {
         <div className="space-y-1">
           <Label>Stock mínimo <span className="text-xs text-slate-400">(opcional)</span></Label>
           <Input type="number" min="0" value={form.stock_minimo} onChange={e => set('stock_minimo', e.target.value)} />
-          <p className="text-xs text-slate-400">Cuando el stock baje de este número, aparece una alerta "Crítico" en el inventario. Dejá en 0 para no usar alertas.</p>
+          <p className="text-xs text-slate-400">Cuando el stock baje de este número, aparece una alerta &quot;Crítico&quot; en el inventario. Dejá en 0 para no usar alertas.</p>
         </div>
         <div className="space-y-1">
           <Label>Ubicación <span className="text-xs text-slate-400">(ej: Estante A-3)</span></Label>
