@@ -8,7 +8,7 @@ export default async function InventarioPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const { data: perfil } = user
-    ? await supabase.from('perfiles').select('rol').eq('id', user.id).single()
+    ? await supabase.from('perfiles').select('rol, nombre').eq('id', user.id).single()
     : { data: null }
   const isAdmin = perfil?.rol === 'admin'
 
@@ -31,6 +31,8 @@ export default async function InventarioPage() {
         productos={productos ?? []}
         categorias={categorias ?? []}
         isAdmin={isAdmin}
+        vendedorId={user?.id ?? ''}
+        vendedorNombre={perfil?.nombre ?? 'Vendedor'}
       />
     </div>
   )

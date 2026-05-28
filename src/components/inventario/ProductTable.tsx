@@ -8,14 +8,15 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
-import { Edit, PackagePlus, Check, X } from 'lucide-react'
+import { Edit, PackagePlus, Check, X, ShoppingCart } from 'lucide-react'
 
 interface Props {
   productos: Producto[]
   isAdmin?: boolean
+  onAddToCart?: (p: Producto) => void
 }
 
-export function ProductTable({ productos, isAdmin = false }: Props) {
+export function ProductTable({ productos, isAdmin = false, onAddToCart }: Props) {
   const router = useRouter()
   const [stockEntryId, setStockEntryId] = useState<string | null>(null)
   const [stockQty, setStockQty] = useState('')
@@ -123,11 +124,18 @@ export function ProductTable({ productos, isAdmin = false }: Props) {
                 </Badge>
               </td>
               <td className="p-3">
-                {isAdmin && (
-                  <Button asChild size="sm" variant="ghost">
-                    <Link href={`/inventario/${p.id}/editar`}><Edit size={14} /></Link>
-                  </Button>
-                )}
+                <div className="flex items-center gap-1">
+                  {onAddToCart && (
+                    <Button size="sm" variant="ghost" title="Agregar al carrito" onClick={() => onAddToCart(p)}>
+                      <ShoppingCart size={14} className="text-green-600" />
+                    </Button>
+                  )}
+                  {isAdmin && (
+                    <Button asChild size="sm" variant="ghost">
+                      <Link href={`/inventario/${p.id}/editar`}><Edit size={14} /></Link>
+                    </Button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}
