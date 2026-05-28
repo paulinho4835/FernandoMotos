@@ -46,7 +46,7 @@ export default async function HistorialPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Historial de Ventas</h1>
+      <h1 className="text-2xl font-bold">Ventas</h1>
 
       {/* Resumen del día */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
