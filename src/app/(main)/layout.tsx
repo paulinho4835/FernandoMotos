@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import {
   LayoutDashboard, Package, Bike, ShoppingCart,
-  History, Users, LogOut
+  History, Users, LogOut, Tag
 } from 'lucide-react'
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
@@ -22,6 +22,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   const navItems = [
     ...(isAdmin ? [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }] : []),
     { href: '/inventario', label: 'Repuestos', icon: Package },
+    ...(isAdmin ? [{ href: '/categorias', label: 'Categorías', icon: Tag }] : []),
     { href: '/inventario/motos', label: 'Motos', icon: Bike },
     { href: '/caja', label: 'Caja', icon: ShoppingCart },
     { href: '/historial', label: 'Historial', icon: History },

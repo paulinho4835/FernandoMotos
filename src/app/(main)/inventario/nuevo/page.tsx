@@ -9,10 +9,13 @@ export default async function NuevoProductoPage() {
   const { data: perfil } = await supabase.from('perfiles').select('rol').eq('id', user.id).single()
   if (perfil?.rol !== 'admin') redirect('/inventario')
 
+  const { data: categorias } = await supabase
+    .from('categorias').select('*').eq('activo', true).order('orden').order('nombre')
+
   return (
     <div className="p-6 space-y-4">
       <h1 className="text-2xl font-bold">Nuevo Producto</h1>
-      <ProductForm />
+      <ProductForm categorias={categorias ?? []} />
     </div>
   )
 }

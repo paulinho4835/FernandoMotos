@@ -17,7 +17,7 @@ export function ProductSearch() {
     const supabase = createClient()
     const { data } = await supabase
       .from('productos')
-      .select('*')
+      .select('id, codigo, nombre, descripcion, costo, precio_venta, precio_referencial, medida_interna, medida_externa, altura, stock, stock_minimo, ubicacion, compatibilidad, categoria_id, activo, created_at, updated_at')
       .eq('activo', true)
       .or(`codigo.ilike.%${q}%,nombre.ilike.%${q}%`)
       .order('nombre')
@@ -63,9 +63,23 @@ export function ProductSearch() {
               className="w-full text-left px-4 py-2 hover:bg-slate-50 flex justify-between items-center">
               <div>
                 <p className="font-medium text-sm">{p.nombre}</p>
-                <p className="text-xs text-slate-500">{p.codigo} · Stock: {p.stock}</p>
+                <p className="text-xs text-slate-500">
+                  {p.codigo} · Stock: {p.stock}
+                  {(p.medida_interna || p.medida_externa || p.altura) && (
+                    <> · {[
+                      p.medida_interna && `Int: ${p.medida_interna}`,
+                      p.medida_externa && `Ext: ${p.medida_externa}`,
+                      p.altura && `Alt: ${p.altura}`,
+                    ].filter(Boolean).join(' / ')}</>
+                  )}
+                </p>
               </div>
-              <span className="text-sm font-semibold">{formatBOB(p.precio_venta)}</span>
+              <div className="text-right">
+                <p className="text-sm font-semibold">{formatBOB(p.precio_venta)}</p>
+                {p.precio_referencial && (
+                  <p className="text-xs text-slate-400">Ref: {formatBOB(p.precio_referencial)}</p>
+                )}
+              </div>
             </button>
           ))}
         </div>

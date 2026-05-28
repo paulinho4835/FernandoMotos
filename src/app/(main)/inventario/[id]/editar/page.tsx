@@ -10,13 +10,16 @@ export default async function EditarProductoPage({ params }: { params: Promise<{
   const { data: perfil } = await supabase.from('perfiles').select('rol').eq('id', user.id).single()
   if (perfil?.rol !== 'admin') redirect('/inventario')
 
-  const { data: producto } = await supabase.from('productos').select('*').eq('id', id).single()
+  const [{ data: producto }, { data: categorias }] = await Promise.all([
+    supabase.from('productos').select('*').eq('id', id).single(),
+    supabase.from('categorias').select('*').eq('activo', true).order('orden').order('nombre'),
+  ])
   if (!producto) notFound()
 
   return (
     <div className="p-6 space-y-4">
       <h1 className="text-2xl font-bold">Editar Producto</h1>
-      <ProductForm producto={producto} />
+      <ProductForm producto={producto} categorias={categorias ?? []} />
     </div>
   )
 }

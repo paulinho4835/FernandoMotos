@@ -1,6 +1,15 @@
 export type Rol = 'admin' | 'vendedor'
 export type TipoVenta = 'repuesto' | 'moto'
 
+export interface Categoria {
+  id: string
+  nombre: string
+  descripcion: string | null
+  orden: number
+  activo: boolean
+  created_at: string
+}
+
 export interface Perfil {
   id: string
   rol: Rol
@@ -23,10 +32,16 @@ export interface Producto {
   descripcion: string | null
   costo: number
   precio_venta: number
+  precio_referencial: number | null
+  medida_interna: string | null
+  medida_externa: string | null
+  altura: string | null
   stock: number
   stock_minimo: number
   ubicacion: string | null
   compatibilidad: string[]
+  categoria_id: string | null
+  categorias?: Pick<Categoria, 'nombre'> | null
   activo: boolean
   created_at: string
   updated_at: string

@@ -1,0 +1,29 @@
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { CategoriasClient } from '@/components/inventario/CategoriasClient'
+
+export default async function CategoriasPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: perfil } = await supabase.from('perfiles').select('rol').eq('id', user.id).single()
+  if (perfil?.rol !== 'admin') redirect('/inventario')
+
+  const { data: categorias } = await supabase
+    .from('categorias')
+    .select('*')
+    .eq('activo', true)
+    .order('orden')
+    .order('nombre')
+
+  return (
+    <div className="p-6 space-y-4">
+      <div>
+        <h1 className="text-2xl font-bold">Categorías de Productos</h1>
+        <p className="text-sm text-slate-500 mt-1">Organiza los repuestos en categorías para facilitar la búsqueda.</p>
+      </div>
+      <CategoriasClient categorias={categorias ?? []} />
+    </div>
+  )
+}
