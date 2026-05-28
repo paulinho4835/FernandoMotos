@@ -181,12 +181,7 @@ export function ProductForm({ producto, categorias = [] }: Props) {
         <div className="space-y-1">
           <Label>Precio referencial (Bs.) <span className="text-xs text-slate-400">(opcional)</span></Label>
           <Input type="number" step="0.01" value={form.precio_referencial} onChange={e => set('precio_referencial', e.target.value)} placeholder="Precio aproximado de venta" />
-          <p className="text-xs text-slate-400">Guía para vendedores. No es el precio definitivo.</p>
-        </div>
-        <div className="space-y-1">
-          <Label>Precio de venta (Bs.) <span className="text-xs text-slate-400">(opcional)</span></Label>
-          <Input type="number" step="0.01" value={form.precio_venta} onChange={e => set('precio_venta', e.target.value)} />
-          <p className="text-xs text-slate-400">Podés definirlo al momento de realizar la venta.</p>
+          <p className="text-xs text-slate-400">Guía para vendedores. Se puede cambiar al momento de vender.</p>
         </div>
       </div>
 
