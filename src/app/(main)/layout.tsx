@@ -25,7 +25,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
     ...(isAdmin ? [{ href: '/categorias', label: 'Categorías', icon: Tag }] : []),
     { href: '/inventario/motos', label: 'Motos', icon: Bike },
     { href: '/caja', label: 'Caja', icon: ShoppingCart },
-    { href: '/historial', label: 'Historial', icon: History },
+    { href: '/historial', label: 'Historial de Ventas', icon: History },
     { href: '/clientes', label: 'Clientes', icon: Users },
   ]
 
