@@ -28,8 +28,8 @@ interface Venta {
   total: number
   created_at: string
   perfiles: { nombre: string } | null
-  detalle_venta: DetalleRepuesto[]
-  detalle_venta_moto: DetalleMoto[]
+  detalle_ventas: DetalleRepuesto[]
+  detalle_ventas_motos: DetalleMoto[]
 }
 
 interface Props { clientes: Cliente[] }
@@ -67,8 +67,8 @@ export function ClientesClient({ clientes }: Props) {
       .select(`
         id, tipo_venta, total, created_at,
         perfiles(nombre),
-        detalle_venta(id, cantidad, precio_unitario, subtotal, productos(codigo, nombre)),
-        detalle_venta_moto(id, cantidad, precio_unitario, subtotal, motos(marca, modelo, anio))
+        detalle_ventas(id, cantidad, precio_unitario, subtotal, productos(codigo, nombre)),
+        detalle_ventas_motos(id, cantidad, precio_unitario, subtotal, motos(marca, modelo, anio))
       `)
       .eq('cliente_id', c.id)
       .order('created_at', { ascending: false })
@@ -189,7 +189,7 @@ export function ClientesClient({ clientes }: Props) {
 
                       {expandedVenta === v.id && (
                         <div className="mt-2 ml-5 space-y-1">
-                          {v.tipo_venta === 'repuesto' && v.detalle_venta.map(d => (
+                          {v.tipo_venta === 'repuesto' && v.detalle_ventas.map(d => (
                             <div key={d.id} className="flex justify-between text-xs text-slate-600">
                               <span>
                                 {d.productos?.nombre || d.productos?.codigo || '—'}
@@ -198,7 +198,7 @@ export function ClientesClient({ clientes }: Props) {
                               <span className="font-medium shrink-0 ml-2">{formatBOB(d.subtotal)}</span>
                             </div>
                           ))}
-                          {v.tipo_venta === 'moto' && v.detalle_venta_moto.map(d => (
+                          {v.tipo_venta === 'moto' && v.detalle_ventas_motos.map(d => (
                             <div key={d.id} className="flex justify-between text-xs text-slate-600">
                               <span>
                                 {d.motos ? `${d.motos.marca} ${d.motos.modelo}${d.motos.anio ? ` ${d.motos.anio}` : ''}` : '—'}

@@ -42,7 +42,7 @@ export function SalesTable({ ventas, title, isAdmin }: Props) {
                   </Badge>
                 </td>
                 <td className="p-3">{v.clientes?.nombre ?? <span className="text-slate-400">—</span>}</td>
-                <td className="p-3">{v.perfiles?.nombre}</td>
+                <td className="p-3">{v.perfiles?.email ?? v.perfiles?.nombre ?? <span className="text-slate-400">—</span>}</td>
                 <td className="p-3 text-right font-semibold">{formatBOB(v.total)}</td>
                 {isAdmin && (
                   <td className="p-3 text-right text-green-600">{formatBOB(v.ganancia_neta)}</td>

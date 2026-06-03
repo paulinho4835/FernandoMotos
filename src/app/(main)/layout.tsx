@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import {
-  LayoutDashboard, Package, Bike, ShoppingCart,
+  LayoutDashboard, Package, Bike,
   History, Users, LogOut, Tag
 } from 'lucide-react'
 
@@ -23,8 +23,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
     { href: '/inventario', label: 'Repuestos', icon: Package },
     { href: '/inventario/motos', label: 'Motos', icon: Bike },
     { href: '/historial', label: 'Ventas', icon: History },
-    { href: '/caja', label: 'Caja', icon: ShoppingCart },
-    ...(isAdmin ? [{ href: '/categorias', label: 'Categorías', icon: Tag }] : []),
+    { href: '/categorias', label: 'Categorías', icon: Tag },
     { href: '/clientes', label: 'Clientes', icon: Users },
     ...(isAdmin ? [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }] : []),
   ]

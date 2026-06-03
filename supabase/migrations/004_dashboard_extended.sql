@@ -21,8 +21,8 @@ $$;
 CREATE OR REPLACE FUNCTION get_inventory_value()
 RETURNS jsonb LANGUAGE sql SECURITY DEFINER STABLE AS $$
   SELECT jsonb_build_object(
-    'costo_productos',    COALESCE((SELECT SUM(costo * stock)       FROM productos WHERE activo AND stock > 0), 0),
-    'valor_productos',    COALESCE((SELECT SUM(precio_venta * stock) FROM productos WHERE activo AND stock > 0), 0),
+    'costo_productos',    COALESCE((SELECT SUM(costo * stock)              FROM productos WHERE activo AND stock > 0), 0),
+    'valor_productos',    COALESCE((SELECT SUM(precio_referencial * stock) FROM productos WHERE activo AND stock > 0), 0),
     'unidades_productos', COALESCE((SELECT SUM(stock)               FROM productos WHERE activo AND stock > 0), 0),
     'costo_motos',        COALESCE((SELECT SUM(costo * stock)       FROM motos     WHERE activo AND stock > 0), 0),
     'valor_motos',        COALESCE((SELECT SUM(precio_venta * stock) FROM motos    WHERE activo AND stock > 0), 0),

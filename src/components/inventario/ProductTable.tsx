@@ -47,7 +47,6 @@ export function ProductTable({ productos, isAdmin = false, onAddToCart }: Props)
             <th className="text-left p-3">Stock</th>
             {isAdmin && <th className="text-left p-3">Costo</th>}
             <th className="text-left p-3">P. Referencial</th>
-            <th className="text-left p-3">P. Venta</th>
             <th className="text-left p-3">Ubicación</th>
             <th className="text-left p-3">Estado</th>
             <th className="p-3" />
@@ -116,7 +115,6 @@ export function ProductTable({ productos, isAdmin = false, onAddToCart }: Props)
               <td className="p-3 text-slate-500">
                 {p.precio_referencial ? formatBOB(p.precio_referencial) : '—'}
               </td>
-              <td className="p-3">{p.precio_venta ? formatBOB(p.precio_venta) : '—'}</td>
               <td className="p-3 text-slate-500">{p.ubicacion ?? '—'}</td>
               <td className="p-3">
                 <Badge variant={p.activo ? 'default' : 'secondary'}>
@@ -140,7 +138,7 @@ export function ProductTable({ productos, isAdmin = false, onAddToCart }: Props)
             </tr>
           ))}
           {productos.length === 0 && (
-            <tr><td colSpan={isAdmin ? 9 : 8} className="p-6 text-center text-slate-400">Sin productos</td></tr>
+            <tr><td colSpan={isAdmin ? 8 : 7} className="p-6 text-center text-slate-400">Sin productos</td></tr>
           )}
         </tbody>
       </table>

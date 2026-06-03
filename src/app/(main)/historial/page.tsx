@@ -23,14 +23,10 @@ export default async function HistorialPage() {
     .from('perfiles').select('rol').eq('id', user!.id).single()
   const isAdmin = perfil?.rol === 'admin'
 
-  const query = supabase
+  const { data: ventas } = await supabase
     .from('ventas')
-    .select('*, clientes(nombre), perfiles(nombre)')
+    .select('*, clientes(nombre), perfiles(nombre, email)')
     .order('created_at', { ascending: true })
-
-  const { data: ventas } = isAdmin
-    ? await query
-    : await query.eq('vendedor_id', user!.id)
 
   const all = ventas ?? []
   const hoy = all.filter(v => isToday(v.created_at))
@@ -84,28 +80,29 @@ export default async function HistorialPage() {
       {/* Tabs */}
       <Tabs defaultValue="total">
         <TabsList>
-          <TabsTrigger value="total">Total ({all.length})</TabsTrigger>
-          <TabsTrigger value="repuestos">Repuestos ({repuestosHoy.length + repuestosAnt.length})</TabsTrigger>
-          <TabsTrigger value="motos">Motos ({motosHoy.length + motosAnt.length})</TabsTrigger>
+          <TabsTrigger value="total">Total ({isAdmin ? all.length : hoy.length})</TabsTrigger>
+          <TabsTrigger value="repuestos">Repuestos ({isAdmin ? repuestosHoy.length + repuestosAnt.length : repuestosHoy.length})</TabsTrigger>
+          <TabsTrigger value="motos">Motos ({isAdmin ? motosHoy.length + motosAnt.length : motosHoy.length})</TabsTrigger>
+
         </TabsList>
 
         <TabsContent value="total" className="space-y-6 mt-4">
           <SalesTable ventas={hoy} title="Ventas de hoy" isAdmin={isAdmin} />
-          {anteriores.length > 0 && (
+          {isAdmin && anteriores.length > 0 && (
             <SalesTable ventas={anteriores} title="Ventas anteriores" isAdmin={isAdmin} />
           )}
         </TabsContent>
 
         <TabsContent value="repuestos" className="space-y-6 mt-4">
           <SalesTable ventas={repuestosHoy} title="Ventas de hoy" isAdmin={isAdmin} />
-          {repuestosAnt.length > 0 && (
+          {isAdmin && repuestosAnt.length > 0 && (
             <SalesTable ventas={repuestosAnt} title="Ventas anteriores" isAdmin={isAdmin} />
           )}
         </TabsContent>
 
         <TabsContent value="motos" className="space-y-6 mt-4">
           <SalesTable ventas={motosHoy} title="Ventas de hoy" isAdmin={isAdmin} />
-          {motosAnt.length > 0 && (
+          {isAdmin && motosAnt.length > 0 && (
             <SalesTable ventas={motosAnt} title="Ventas anteriores" isAdmin={isAdmin} />
           )}
         </TabsContent>
