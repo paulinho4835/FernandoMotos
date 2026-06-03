@@ -82,6 +82,8 @@ export interface Venta {
   // joined
   clientes?: Pick<Cliente, 'nombre'> | null
   perfiles?: Pick<Perfil, 'nombre' | 'email'> | null
+  detalle_ventas?: { cantidad: number; productos: Pick<Producto, 'nombre'> | null }[] | null
+  detalle_ventas_motos?: { cantidad: number; motos: Pick<Moto, 'marca' | 'modelo'> | null }[] | null
 }
 
 export interface DetalleVenta {

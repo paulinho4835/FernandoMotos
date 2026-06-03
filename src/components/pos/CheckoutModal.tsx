@@ -43,6 +43,7 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre 
   const [clienteSeleccionado, setClienteSeleccionado] = useState<ClienteSugerido | null>(null)
   const [sugerencias, setSugerencias] = useState<ClienteSugerido[]>([])
   const [showSugerencias, setShowSugerencias] = useState(false)
+  const [telefono, setTelefono] = useState('')
   const [notas, setNotas] = useState('')
   const [loading, setLoading] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -55,6 +56,7 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre 
       setClienteQuery('')
       setClienteSeleccionado(null)
       setSugerencias([])
+      setTelefono('')
       setNotas('')
     }
   }, [open])
@@ -81,6 +83,7 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre 
   function seleccionarCliente(c: ClienteSugerido) {
     setClienteSeleccionado(c)
     setClienteQuery(c.nombre)
+    if (c.telefono) setTelefono(c.telefono)
     setSugerencias([])
     setShowSugerencias(false)
   }
@@ -88,10 +91,22 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre 
   function limpiarCliente() {
     setClienteSeleccionado(null)
     setClienteQuery('')
+    setTelefono('')
     setSugerencias([])
   }
 
   async function handleConfirm() {
+    if (mode === 'moto') {
+      if (!clienteQuery.trim()) {
+        toast.error('Ingresa el nombre del cliente para venta de moto')
+        return
+      }
+      if (!telefono.trim()) {
+        toast.error('El teléfono del cliente es obligatorio para venta de moto')
+        return
+      }
+    }
+
     setLoading(true)
     const supabase = createClient()
 
@@ -101,9 +116,14 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre 
     if (clienteSeleccionado) {
       clienteId = clienteSeleccionado.id
       clienteNombreFinal = clienteSeleccionado.nombre
+      if (mode === 'moto' && telefono.trim() && telefono.trim() !== (clienteSeleccionado.telefono ?? '')) {
+        await supabase.from('clientes').update({ telefono: telefono.trim() }).eq('id', clienteId)
+      }
     } else if (clienteQuery.trim()) {
       const { data: c } = await supabase
-        .from('clientes').insert({ nombre: clienteQuery.trim() }).select('id').single()
+        .from('clientes')
+        .insert({ nombre: clienteQuery.trim(), telefono: telefono.trim() || null })
+        .select('id').single()
       clienteId = c?.id ?? null
       clienteNombreFinal = clienteQuery.trim()
     }
@@ -176,7 +196,7 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre 
           </div>
 
           <div className="space-y-1">
-            <Label>Cliente (opcional)</Label>
+            <Label>{mode === 'moto' ? 'Cliente (obligatorio)' : 'Cliente (opcional)'}</Label>
             <div className="relative" ref={dropdownRef}>
               <div className="flex gap-2">
                 <Input
@@ -225,6 +245,20 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre 
               )}
             </div>
           </div>
+
+          {mode === 'moto' && (
+            <div className="space-y-1">
+              <Label>Teléfono del cliente (obligatorio)</Label>
+              <Input
+                type="tel"
+                placeholder="Ej: 70012345"
+                value={telefono}
+                onChange={e => setTelefono(e.target.value)}
+                className={telefono.trim() ? '' : 'border-red-300'}
+                required
+              />
+            </div>
+          )}
 
           <div className="space-y-1">
             <Label>Notas (opcional)</Label>

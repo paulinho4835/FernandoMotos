@@ -41,7 +41,6 @@ export function ProductForm({ producto, categorias = [] }: Props) {
   const [form, setForm] = useState({
     codigo:             producto?.codigo ?? '',
     nombre:             producto?.nombre ?? '',
-    descripcion:        producto?.descripcion ?? '',
     costo:              producto?.costo?.toString() ?? '',
     precio_venta:       producto?.precio_venta?.toString() ?? '',
     precio_referencial: producto?.precio_referencial?.toString() ?? '',
@@ -67,7 +66,7 @@ export function ProductForm({ producto, categorias = [] }: Props) {
     const data = {
       codigo:             form.codigo,
       nombre:             form.nombre,
-      descripcion:        form.descripcion || null,
+      descripcion:        null,
       costo:              parseFloat(form.costo),
       precio_venta:       form.precio_venta ? parseFloat(form.precio_venta) : 0,
       precio_referencial: form.precio_referencial ? parseFloat(form.precio_referencial) : null,
@@ -143,8 +142,7 @@ export function ProductForm({ producto, categorias = [] }: Props) {
         <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Identificación</h2>
         {[
           { label: 'Código', field: 'codigo', required: true },
-          { label: 'Nombre',       field: 'nombre' },
-          { label: 'Descripción',  field: 'descripcion' },
+          { label: 'Descripción',  field: 'nombre', required: true },
         ].map(({ label, field, required }) => (
           <div key={field} className="space-y-1">
             <Label>{label}{required && <span className="text-red-500 ml-1">*</span>}</Label>

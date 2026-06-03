@@ -8,10 +8,21 @@ interface Props {
   isAdmin?: boolean
 }
 
+function detalleText(v: Venta): string {
+  const parts: string[] = []
+  for (const d of v.detalle_ventas ?? []) {
+    if (d.productos?.nombre) parts.push(`${d.cantidad}× ${d.productos.nombre}`)
+  }
+  for (const d of v.detalle_ventas_motos ?? []) {
+    if (d.motos) parts.push(`${d.cantidad}× ${d.motos.marca} ${d.motos.modelo}`)
+  }
+  return parts.join(', ')
+}
+
 export function SalesTable({ ventas, title, isAdmin }: Props) {
   const totalVentas = ventas.reduce((s, v) => s + (v.total ?? 0), 0)
   const totalGanancia = ventas.reduce((s, v) => s + (v.ganancia_neta ?? 0), 0)
-  const cols = isAdmin ? 6 : 5
+  const cols = isAdmin ? 7 : 6
 
   return (
     <div className="space-y-2">
@@ -24,6 +35,7 @@ export function SalesTable({ ventas, title, isAdmin }: Props) {
             <tr>
               <th className="text-left p-3">Fecha</th>
               <th className="text-left p-3">Tipo</th>
+              <th className="text-left p-3">Detalle</th>
               <th className="text-left p-3">Cliente</th>
               <th className="text-left p-3">Vendedor</th>
               <th className="text-right p-3">Total</th>
@@ -41,6 +53,7 @@ export function SalesTable({ ventas, title, isAdmin }: Props) {
                     {v.tipo_venta === 'moto' ? 'Moto' : 'Repuesto'}
                   </Badge>
                 </td>
+                <td className="p-3 max-w-xs text-slate-700">{detalleText(v) || <span className="text-slate-400">—</span>}</td>
                 <td className="p-3">{v.clientes?.nombre ?? <span className="text-slate-400">—</span>}</td>
                 <td className="p-3">{v.perfiles?.email ?? v.perfiles?.nombre ?? <span className="text-slate-400">—</span>}</td>
                 <td className="p-3 text-right font-semibold">{formatBOB(v.total)}</td>
@@ -56,7 +69,7 @@ export function SalesTable({ ventas, title, isAdmin }: Props) {
           {ventas.length > 0 && (
             <tfoot className="bg-slate-100 border-t-2 border-slate-300 font-semibold text-sm">
               <tr>
-                <td colSpan={isAdmin ? 4 : 4} className="p-3 text-slate-600">
+                <td colSpan={5} className="p-3 text-slate-600">
                   Total ({ventas.length} {ventas.length === 1 ? 'venta' : 'ventas'})
                 </td>
                 <td className="p-3 text-right">{formatBOB(totalVentas)}</td>

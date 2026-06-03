@@ -1,0 +1,136 @@
+'use client'
+import { useState, useMemo } from 'react'
+import type { Venta } from '@/lib/types'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { SalesTable } from '@/components/historial/SalesTable'
+import { formatBOB } from '@/lib/utils/formatCurrency'
+import { ShoppingBag, TrendingUp, DollarSign } from 'lucide-react'
+
+// Bolivia is UTC-4 (no DST)
+function todayBOT() {
+  return new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString().split('T')[0]
+}
+function dateBOT(s: string) {
+  return new Date(new Date(s).getTime() - 4 * 60 * 60 * 1000).toISOString().split('T')[0]
+}
+function addDays(d: string, n: number) {
+  const dt = new Date(d + 'T00:00:00Z')
+  dt.setUTCDate(dt.getUTCDate() + n)
+  return dt.toISOString().split('T')[0]
+}
+function labelFecha(d: string) {
+  return new Date(d + 'T00:00:00').toLocaleDateString('es-BO', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  })
+}
+
+interface Props {
+  ventas: Venta[]
+  isAdmin: boolean
+}
+
+export function HistorialClient({ ventas, isAdmin }: Props) {
+  const hoy = todayBOT()
+  const [fecha, setFecha] = useState(hoy)
+
+  const delDia = useMemo(
+    () => ventas.filter(v => dateBOT(v.created_at) === fecha),
+    [ventas, fecha]
+  )
+  const repuestos = delDia.filter(v => v.tipo_venta === 'repuesto')
+  const motos = delDia.filter(v => v.tipo_venta === 'moto')
+
+  const totalDia = delDia.reduce((s, v) => s + (v.total ?? 0), 0)
+  const gananciaDia = delDia.reduce((s, v) => s + (v.ganancia_neta ?? 0), 0)
+
+  const quick = [
+    { label: 'Hoy', value: hoy },
+    { label: 'Ayer', value: addDays(hoy, -1) },
+    { label: 'Antes de ayer', value: addDays(hoy, -2) },
+  ]
+
+  return (
+    <div className="space-y-6">
+      {/* Filtro de fecha */}
+      <div className="flex flex-wrap items-end gap-3 rounded-xl border bg-white p-4">
+        <div className="space-y-1">
+          <label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Fecha</label>
+          <Input
+            type="date"
+            value={fecha}
+            max={hoy}
+            onChange={e => setFecha(e.target.value || hoy)}
+            className="w-44"
+          />
+        </div>
+        <div className="flex gap-2">
+          {quick.map(q => (
+            <Button
+              key={q.value}
+              variant={fecha === q.value ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFecha(q.value)}
+            >
+              {q.label}
+            </Button>
+          ))}
+        </div>
+        <p className="text-sm text-slate-500 ml-auto capitalize">{labelFecha(fecha)}</p>
+      </div>
+
+      {/* Resumen del día */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-xl border bg-white p-4 flex items-center gap-3">
+          <div className="bg-blue-100 rounded-lg p-2">
+            <ShoppingBag size={20} className="text-blue-600" />
+          </div>
+          <div>
+            <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Ventas</p>
+            <p className="text-2xl font-bold">{delDia.length}</p>
+          </div>
+        </div>
+        <div className="rounded-xl border bg-white p-4 flex items-center gap-3">
+          <div className="bg-slate-100 rounded-lg p-2">
+            <DollarSign size={20} className="text-slate-600" />
+          </div>
+          <div>
+            <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Total</p>
+            <p className="text-2xl font-bold">{formatBOB(totalDia)}</p>
+          </div>
+        </div>
+        {isAdmin && (
+          <div className="rounded-xl border bg-white p-4 flex items-center gap-3">
+            <div className="bg-green-100 rounded-lg p-2">
+              <TrendingUp size={20} className="text-green-600" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Ganancia</p>
+              <p className="text-2xl font-bold text-green-600">{formatBOB(gananciaDia)}</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Tabs por tipo */}
+      <Tabs defaultValue="total">
+        <TabsList>
+          <TabsTrigger value="total">Total ({delDia.length})</TabsTrigger>
+          <TabsTrigger value="repuestos">Repuestos ({repuestos.length})</TabsTrigger>
+          <TabsTrigger value="motos">Motos ({motos.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="total" className="mt-4">
+          <SalesTable ventas={delDia} isAdmin={isAdmin} />
+        </TabsContent>
+        <TabsContent value="repuestos" className="mt-4">
+          <SalesTable ventas={repuestos} isAdmin={isAdmin} />
+        </TabsContent>
+        <TabsContent value="motos" className="mt-4">
+          <SalesTable ventas={motos} isAdmin={isAdmin} />
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}
