@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import {
   LayoutDashboard, Package, Bike,
-  History, Users, LogOut, Tag
+  History, Users, LogOut, Tag, UserCog
 } from 'lucide-react'
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
@@ -25,7 +25,10 @@ export default async function MainLayout({ children }: { children: React.ReactNo
     { href: '/historial', label: 'Ventas', icon: History },
     { href: '/categorias', label: 'Categorías', icon: Tag },
     { href: '/clientes', label: 'Clientes', icon: Users },
-    ...(isAdmin ? [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }] : []),
+    ...(isAdmin ? [
+      { href: '/vendedores', label: 'Vendedores', icon: UserCog },
+      { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    ] : []),
   ]
 
   async function signOut() {

@@ -137,6 +137,7 @@ export function MotosClient({ motos, isAdmin, vendedorId, vendedorNombre }: Prop
         mode="moto"
         vendedorId={vendedorId}
         vendedorNombre={vendedorNombre}
+        isAdmin={isAdmin}
       />
     </div>
   )

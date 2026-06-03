@@ -1,4 +1,12 @@
 export type Rol = 'admin' | 'vendedor'
+
+export interface Vendedor {
+  id: string
+  nombre: string
+  tipo: 'admin' | 'vendedor'
+  activo: boolean
+  created_at: string
+}
 export type TipoVenta = 'repuesto' | 'moto'
 
 export interface Categoria {
@@ -79,6 +87,7 @@ export interface Venta {
   estado: string
   notas: string | null
   created_at: string
+  vendedor_nombre?: string | null
   // joined
   clientes?: Pick<Cliente, 'nombre'> | null
   perfiles?: Pick<Perfil, 'nombre' | 'email'> | null

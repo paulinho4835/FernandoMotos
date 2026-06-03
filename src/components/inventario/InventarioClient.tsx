@@ -285,6 +285,7 @@ export function InventarioClient({ productos, categorias, isAdmin, vendedorId, v
         mode="repuesto"
         vendedorId={vendedorId}
         vendedorNombre={vendedorNombre}
+        isAdmin={isAdmin}
       />
     </div>
   )

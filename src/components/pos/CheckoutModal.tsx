@@ -1,9 +1,10 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useCartStore } from '@/lib/store/cartStore'
 import { useMotoCartStore } from '@/lib/store/motoCartStore'
-import type { TipoVenta } from '@/lib/types'
+import type { TipoVenta, Vendedor } from '@/lib/types'
 import { formatBOB } from '@/lib/utils/formatCurrency'
 import { generateAndOpenPDF } from './ReceiptPDF'
 import {
@@ -20,6 +21,7 @@ interface Props {
   mode: TipoVenta
   vendedorId: string
   vendedorNombre: string
+  isAdmin: boolean
 }
 
 interface ClienteSugerido {
@@ -28,7 +30,8 @@ interface ClienteSugerido {
   telefono: string | null
 }
 
-export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre }: Props) {
+export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre, isAdmin }: Props) {
+  const router = useRouter()
   const repuestoItems = useCartStore(s => s.items)
   const repuestoTotal = useCartStore(s => s.total)
   const repuestoGanancia = useCartStore(s => s.ganancia)
@@ -43,6 +46,8 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre 
   const [clienteSeleccionado, setClienteSeleccionado] = useState<ClienteSugerido | null>(null)
   const [sugerencias, setSugerencias] = useState<ClienteSugerido[]>([])
   const [showSugerencias, setShowSugerencias] = useState(false)
+  const [vendedores, setVendedores] = useState<Vendedor[]>([])
+  const [vendedorSeleccionado, setVendedorSeleccionado] = useState('')
   const [telefono, setTelefono] = useState('')
   const [notas, setNotas] = useState('')
   const [loading, setLoading] = useState(false)
@@ -52,10 +57,18 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre 
   const ganancia = mode === 'repuesto' ? repuestoGanancia() : motoGanancia()
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      const supabase = createClient()
+      supabase.from('vendedores').select('*')
+        .eq('activo', true)
+        .eq('tipo', isAdmin ? 'admin' : 'vendedor')
+        .order('nombre')
+        .then(({ data }) => setVendedores(data ?? []))
+    } else {
       setClienteQuery('')
       setClienteSeleccionado(null)
       setSugerencias([])
+      setVendedorSeleccionado('')
       setTelefono('')
       setNotas('')
     }
@@ -96,6 +109,10 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre 
   }
 
   async function handleConfirm() {
+    if (!vendedorSeleccionado) {
+      toast.error('Selecciona el vendedor')
+      return
+    }
     if (mode === 'moto') {
       if (!clienteQuery.trim()) {
         toast.error('Ingresa el nombre del cliente para venta de moto')
@@ -128,10 +145,13 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre 
       clienteNombreFinal = clienteQuery.trim()
     }
 
+    const nombreVendedor = vendedores.find(v => v.id === vendedorSeleccionado)?.nombre ?? vendedorNombre
+
     const payload =
       mode === 'repuesto'
         ? {
             vendedor_id: vendedorId,
+            vendedor_nombre: nombreVendedor,
             cliente_id: clienteId,
             total,
             ganancia_neta: ganancia,
@@ -145,6 +165,7 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre 
           }
         : {
             vendedor_id: vendedorId,
+            vendedor_nombre: nombreVendedor,
             cliente_id: clienteId,
             total,
             ganancia_neta: ganancia,
@@ -173,7 +194,7 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre 
       motoItems: mode === 'moto' ? motoItems : undefined,
       total,
       clienteNombre: clienteNombreFinal,
-      vendedorNombre,
+      vendedorNombre: nombreVendedor,
       fecha: new Date().toLocaleDateString('es-BO'),
     })
 
@@ -181,6 +202,7 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre 
     toast.success('Venta registrada correctamente')
     setLoading(false)
     onClose()
+    router.refresh()
   }
 
   return (
@@ -193,6 +215,24 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre 
           <div className="bg-slate-50 rounded p-4 flex justify-between items-center">
             <span className="text-slate-600">Total a cobrar</span>
             <span className="text-2xl font-bold">{formatBOB(total)}</span>
+          </div>
+
+          <div className="space-y-1">
+            <Label>Vendedor <span className="text-red-500">*</span></Label>
+            <select
+              value={vendedorSeleccionado}
+              onChange={e => setVendedorSeleccionado(e.target.value)}
+              className="w-full border rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-900"
+              required
+            >
+              <option value="">— Selecciona un vendedor —</option>
+              {vendedores.map(v => (
+                <option key={v.id} value={v.id}>{v.nombre}</option>
+              ))}
+            </select>
+            {vendedores.length === 0 && (
+              <p className="text-xs text-amber-600">No hay vendedores registrados. El administrador debe agregar vendedores primero.</p>
+            )}
           </div>
 
           <div className="space-y-1">

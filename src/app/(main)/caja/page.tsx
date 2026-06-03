@@ -7,7 +7,13 @@ export default async function CajaPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
   const { data: perfil } = await supabase
-    .from('perfiles').select('nombre').eq('id', user.id).single()
+    .from('perfiles').select('nombre, rol').eq('id', user.id).single()
 
-  return <CajaClient vendedorId={user.id} vendedorNombre={perfil?.nombre ?? 'Vendedor'} />
+  return (
+    <CajaClient
+      vendedorId={user.id}
+      vendedorNombre={perfil?.nombre ?? 'Vendedor'}
+      isAdmin={perfil?.rol === 'admin'}
+    />
+  )
 }
