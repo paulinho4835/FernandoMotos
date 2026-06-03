@@ -14,6 +14,7 @@ export interface Perfil {
   id: string
   rol: Rol
   nombre: string
+  email?: string | null
   created_at: string
 }
 
@@ -80,7 +81,7 @@ export interface Venta {
   created_at: string
   // joined
   clientes?: Pick<Cliente, 'nombre'> | null
-  perfiles?: Pick<Perfil, 'nombre'> | null
+  perfiles?: Pick<Perfil, 'nombre' | 'email'> | null
 }
 
 export interface DetalleVenta {
