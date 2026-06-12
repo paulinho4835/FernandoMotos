@@ -30,7 +30,7 @@ interface ClienteSugerido {
   telefono: string | null
 }
 
-export function CheckoutModal({ open, onClose, mode, vendedorId: _vendedorId, vendedorNombre, isAdmin }: Props) {
+export function CheckoutModal({ open, onClose, mode, vendedorNombre, isAdmin }: Props) {
   const router = useRouter()
   const repuestoItems = useCartStore(s => s.items)
   const repuestoTotal = useCartStore(s => s.total)
@@ -54,7 +54,7 @@ export function CheckoutModal({ open, onClose, mode, vendedorId: _vendedorId, ve
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const total = mode === 'repuesto' ? repuestoTotal() : motoTotal()
-  const _ganancia = mode === 'repuesto' ? repuestoGanancia() : motoGanancia()
+
 
   useEffect(() => {
     if (open) {
