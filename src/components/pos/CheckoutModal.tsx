@@ -150,31 +150,19 @@ export function CheckoutModal({ open, onClose, mode, vendedorId, vendedorNombre,
     const payload =
       mode === 'repuesto'
         ? {
-            vendedor_id: vendedorId,
-            vendedor_nombre: nombreVendedor,
             cliente_id: clienteId,
-            total,
-            ganancia_neta: ganancia,
             notas: notas || null,
             items: repuestoItems.map(i => ({
               producto_id: i.producto_id,
               cantidad: i.cantidad,
-              precio_unitario: i.precio_unitario,
-              costo_unitario: i.costo_unitario,
             })),
           }
         : {
-            vendedor_id: vendedorId,
-            vendedor_nombre: nombreVendedor,
             cliente_id: clienteId,
-            total,
-            ganancia_neta: ganancia,
             notas: notas || null,
             items: motoItems.map(i => ({
               moto_id: i.moto_id,
               cantidad: i.cantidad,
-              precio_unitario: i.precio_unitario,
-              costo_unitario: i.costo_unitario,
             })),
           }
 
