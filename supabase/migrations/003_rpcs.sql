@@ -96,18 +96,18 @@ BEGIN
 END;
 $$;
 
--- RPC: dashboard stats for today
+-- RPC: dashboard stats for today (timezone-aware: America/La_Paz UTC-4)
 CREATE OR REPLACE FUNCTION get_dashboard_stats()
 RETURNS jsonb LANGUAGE sql SECURITY DEFINER STABLE AS $$
   SELECT jsonb_build_object(
-    'ventas_repuestos_hoy', COALESCE(SUM(total) FILTER (WHERE tipo_venta='repuesto' AND created_at::date = CURRENT_DATE), 0),
-    'ganancia_repuestos_hoy', COALESCE(SUM(ganancia_neta) FILTER (WHERE tipo_venta='repuesto' AND created_at::date = CURRENT_DATE), 0),
-    'count_repuestos_hoy', COUNT(*) FILTER (WHERE tipo_venta='repuesto' AND created_at::date = CURRENT_DATE),
-    'ventas_motos_hoy', COALESCE(SUM(total) FILTER (WHERE tipo_venta='moto' AND created_at::date = CURRENT_DATE), 0),
-    'ganancia_motos_hoy', COALESCE(SUM(ganancia_neta) FILTER (WHERE tipo_venta='moto' AND created_at::date = CURRENT_DATE), 0),
-    'count_motos_hoy', COUNT(*) FILTER (WHERE tipo_venta='moto' AND created_at::date = CURRENT_DATE),
-    'total_hoy', COALESCE(SUM(total) FILTER (WHERE created_at::date = CURRENT_DATE), 0),
-    'ganancia_total_hoy', COALESCE(SUM(ganancia_neta) FILTER (WHERE created_at::date = CURRENT_DATE), 0)
+    'ventas_repuestos_hoy', COALESCE(SUM(total) FILTER (WHERE tipo_venta='repuesto' AND (created_at AT TIME ZONE 'America/La_Paz')::date = (NOW() AT TIME ZONE 'America/La_Paz')::date), 0),
+    'ganancia_repuestos_hoy', COALESCE(SUM(ganancia_neta) FILTER (WHERE tipo_venta='repuesto' AND (created_at AT TIME ZONE 'America/La_Paz')::date = (NOW() AT TIME ZONE 'America/La_Paz')::date), 0),
+    'count_repuestos_hoy', COUNT(*) FILTER (WHERE tipo_venta='repuesto' AND (created_at AT TIME ZONE 'America/La_Paz')::date = (NOW() AT TIME ZONE 'America/La_Paz')::date),
+    'ventas_motos_hoy', COALESCE(SUM(total) FILTER (WHERE tipo_venta='moto' AND (created_at AT TIME ZONE 'America/La_Paz')::date = (NOW() AT TIME ZONE 'America/La_Paz')::date), 0),
+    'ganancia_motos_hoy', COALESCE(SUM(ganancia_neta) FILTER (WHERE tipo_venta='moto' AND (created_at AT TIME ZONE 'America/La_Paz')::date = (NOW() AT TIME ZONE 'America/La_Paz')::date), 0),
+    'count_motos_hoy', COUNT(*) FILTER (WHERE tipo_venta='moto' AND (created_at AT TIME ZONE 'America/La_Paz')::date = (NOW() AT TIME ZONE 'America/La_Paz')::date),
+    'total_hoy', COALESCE(SUM(total) FILTER (WHERE (created_at AT TIME ZONE 'America/La_Paz')::date = (NOW() AT TIME ZONE 'America/La_Paz')::date), 0),
+    'ganancia_total_hoy', COALESCE(SUM(ganancia_neta) FILTER (WHERE (created_at AT TIME ZONE 'America/La_Paz')::date = (NOW() AT TIME ZONE 'America/La_Paz')::date), 0)
   )
   FROM ventas;
 $$;

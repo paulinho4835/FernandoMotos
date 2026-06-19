@@ -40,6 +40,7 @@ export function ProductForm({ producto, categorias = [] }: Props) {
 
   const [form, setForm] = useState({
     codigo:             producto?.codigo ?? '',
+    marca:              producto?.marca ?? '',
     nombre:             producto?.nombre ?? '',
     costo:              producto?.costo?.toString() ?? '',
     precio_venta:       producto?.precio_venta?.toString() ?? '',
@@ -65,6 +66,7 @@ export function ProductForm({ producto, categorias = [] }: Props) {
     const supabase = createClient()
     const data = {
       codigo:             form.codigo,
+      marca:              form.marca || null,
       nombre:             form.nombre,
       descripcion:        null,
       costo:              parseFloat(form.costo),
@@ -142,10 +144,17 @@ export function ProductForm({ producto, categorias = [] }: Props) {
         <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Identificación</h2>
         {[
           { label: 'Código', field: 'codigo', required: true },
+          { label: 'Marca', field: 'marca', required: false },
           { label: 'Descripción',  field: 'nombre', required: true },
         ].map(({ label, field, required }) => (
           <div key={field} className="space-y-1">
-            <Label>{label}{required && <span className="text-red-500 ml-1">*</span>}</Label>
+            <Label>
+              {label}
+              {required
+                ? <span className="text-red-500 ml-1">*</span>
+                : <span className="text-xs text-slate-400 ml-1">(opcional)</span>
+              }
+            </Label>
             <Input value={form[field as keyof typeof form]} onChange={e => set(field, e.target.value)} required={required} />
           </div>
         ))}

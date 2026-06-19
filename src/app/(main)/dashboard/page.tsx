@@ -16,21 +16,22 @@ export default async function DashboardPage() {
     { data: stats },
     { data: summary },
     { data: inventory },
-    { data: lowProductos },
-    { data: lowMotos },
+    { data: allProductos },
+    { data: allMotos },
   ] = await Promise.all([
     supabase.rpc('get_dashboard_stats'),
     supabase.rpc('get_sales_summary'),
     supabase.rpc('get_inventory_value'),
     supabase.from('productos')
       .select('id, nombre, codigo, stock, stock_minimo')
-      .filter('stock', 'lte', 'stock_minimo')
       .eq('activo', true),
     supabase.from('motos')
       .select('id, marca, modelo, stock, stock_minimo')
-      .filter('stock', 'lte', 'stock_minimo')
       .eq('activo', true),
   ])
+
+  const lowProductos = allProductos?.filter(p => p.stock <= p.stock_minimo) ?? []
+  const lowMotos = allMotos?.filter(m => m.stock <= m.stock_minimo) ?? []
 
   const s = (stats    ?? {}) as Record<string, number>
   const sm = (summary  ?? {}) as Record<string, number>

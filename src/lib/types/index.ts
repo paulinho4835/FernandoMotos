@@ -38,6 +38,7 @@ export interface Producto {
   id: string
   codigo: string
   nombre: string
+  marca?: string | null
   descripcion: string | null
   costo: number
   precio_venta: number

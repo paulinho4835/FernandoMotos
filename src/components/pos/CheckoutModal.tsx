@@ -34,12 +34,10 @@ export function CheckoutModal({ open, onClose, mode, vendedorNombre, isAdmin }: 
   const router = useRouter()
   const repuestoItems = useCartStore(s => s.items)
   const repuestoTotal = useCartStore(s => s.total)
-  const repuestoGanancia = useCartStore(s => s.ganancia)
   const clearRepuesto = useCartStore(s => s.clear)
 
   const motoItems = useMotoCartStore(s => s.items)
   const motoTotal = useMotoCartStore(s => s.total)
-  const motoGanancia = useMotoCartStore(s => s.ganancia)
   const clearMoto = useMotoCartStore(s => s.clear)
 
   const [clienteQuery, setClienteQuery] = useState('')

@@ -1,15 +1,15 @@
 -- 004_dashboard_extended.sql
 
--- Resumen de ventas por período (semana / mes / histórico)
+-- Resumen de ventas por período (semana / mes / histórico), timezone-aware: America/La_Paz UTC-4
 CREATE OR REPLACE FUNCTION get_sales_summary()
 RETURNS jsonb LANGUAGE sql SECURITY DEFINER STABLE AS $$
   SELECT jsonb_build_object(
-    'ventas_semana',   COALESCE(SUM(total)        FILTER (WHERE created_at >= date_trunc('week',  CURRENT_DATE)), 0),
-    'ganancia_semana', COALESCE(SUM(ganancia_neta) FILTER (WHERE created_at >= date_trunc('week',  CURRENT_DATE)), 0),
-    'count_semana',    COUNT(*)                    FILTER (WHERE created_at >= date_trunc('week',  CURRENT_DATE)),
-    'ventas_mes',      COALESCE(SUM(total)        FILTER (WHERE created_at >= date_trunc('month', CURRENT_DATE)), 0),
-    'ganancia_mes',    COALESCE(SUM(ganancia_neta) FILTER (WHERE created_at >= date_trunc('month', CURRENT_DATE)), 0),
-    'count_mes',       COUNT(*)                    FILTER (WHERE created_at >= date_trunc('month', CURRENT_DATE)),
+    'ventas_semana',   COALESCE(SUM(total)        FILTER (WHERE (created_at AT TIME ZONE 'America/La_Paz') >= date_trunc('week',  (NOW() AT TIME ZONE 'America/La_Paz')::date)), 0),
+    'ganancia_semana', COALESCE(SUM(ganancia_neta) FILTER (WHERE (created_at AT TIME ZONE 'America/La_Paz') >= date_trunc('week',  (NOW() AT TIME ZONE 'America/La_Paz')::date)), 0),
+    'count_semana',    COUNT(*)                    FILTER (WHERE (created_at AT TIME ZONE 'America/La_Paz') >= date_trunc('week',  (NOW() AT TIME ZONE 'America/La_Paz')::date)),
+    'ventas_mes',      COALESCE(SUM(total)        FILTER (WHERE (created_at AT TIME ZONE 'America/La_Paz') >= date_trunc('month', (NOW() AT TIME ZONE 'America/La_Paz')::date)), 0),
+    'ganancia_mes',    COALESCE(SUM(ganancia_neta) FILTER (WHERE (created_at AT TIME ZONE 'America/La_Paz') >= date_trunc('month', (NOW() AT TIME ZONE 'America/La_Paz')::date)), 0),
+    'count_mes',       COUNT(*)                    FILTER (WHERE (created_at AT TIME ZONE 'America/La_Paz') >= date_trunc('month', (NOW() AT TIME ZONE 'America/La_Paz')::date)),
     'ventas_total',    COALESCE(SUM(total),        0),
     'ganancia_total',  COALESCE(SUM(ganancia_neta),0),
     'count_total',     COUNT(*)
