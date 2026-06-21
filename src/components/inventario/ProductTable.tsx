@@ -24,12 +24,17 @@ export function ProductTable({ productos, isAdmin = false, onAddToCart }: Props)
 
   async function handleStockEntry(producto: Producto) {
     const qty = parseInt(stockQty)
-    if (!qty || qty <= 0) return
+    if (!qty || qty === 0) return
+    const nuevoStock = producto.stock + qty
+    if (nuevoStock < 0) {
+      alert(`No se puede reducir: el stock quedaría en ${nuevoStock}. Stock actual: ${producto.stock}.`)
+      return
+    }
     setLoadingEntry(true)
     const supabase = createClient()
     await supabase
       .from('productos')
-      .update({ stock: producto.stock + qty, updated_at: new Date().toISOString() })
+      .update({ stock: nuevoStock, updated_at: new Date().toISOString() })
       .eq('id', producto.id)
     setStockEntryId(null)
     setStockQty('')
@@ -71,11 +76,9 @@ export function ProductTable({ productos, isAdmin = false, onAddToCart }: Props)
               <td className="p-3">
                 {stockEntryId === p.id ? (
                   <div className="flex items-center gap-1">
-                    <span className="text-slate-500 text-xs">+</span>
                     <Input
                       type="number"
-                      min="1"
-                      placeholder="Cant."
+                      placeholder="±"
                       value={stockQty}
                       onChange={e => setStockQty(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter') handleStockEntry(p); if (e.key === 'Escape') { setStockEntryId(null); setStockQty('') } }}
