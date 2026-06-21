@@ -88,6 +88,7 @@ export interface Venta {
   estado: string
   notas: string | null
   created_at: string
+  devuelta_at?: string | null
   vendedor_nombre?: string | null
   // joined
   clientes?: Pick<Cliente, 'nombre'> | null

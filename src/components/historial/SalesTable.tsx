@@ -2,7 +2,7 @@ import type { Venta } from '@/lib/types'
 import { formatBOB } from '@/lib/utils/formatCurrency'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Undo2 } from 'lucide-react'
 
 interface Props {
   ventas: Venta[]
@@ -10,6 +10,8 @@ interface Props {
   isAdmin?: boolean
   onDelete?: (id: string) => void
   deletingId?: string | null
+  onDevolver?: (id: string) => void
+  devolviendoId?: string | null
 }
 
 function detalleText(v: Venta): string {
@@ -23,9 +25,10 @@ function detalleText(v: Venta): string {
   return parts.join(', ')
 }
 
-export function SalesTable({ ventas, title, isAdmin, onDelete, deletingId }: Props) {
-  const totalVentas = ventas.reduce((s, v) => s + (v.total ?? 0), 0)
-  const totalGanancia = ventas.reduce((s, v) => s + (v.ganancia_neta ?? 0), 0)
+export function SalesTable({ ventas, title, isAdmin, onDelete, deletingId, onDevolver, devolviendoId }: Props) {
+  // Las ventas devueltas no suman en los totales.
+  const totalVentas = ventas.reduce((s, v) => s + (v.estado === 'devuelta' ? 0 : v.total ?? 0), 0)
+  const totalGanancia = ventas.reduce((s, v) => s + (v.estado === 'devuelta' ? 0 : v.ganancia_neta ?? 0), 0)
   const extraCols = isAdmin ? 2 : 0 // ganancia + acciones
   const cols = 6 + extraCols
 
@@ -49,39 +52,60 @@ export function SalesTable({ ventas, title, isAdmin, onDelete, deletingId }: Pro
             </tr>
           </thead>
           <tbody>
-            {ventas.map(v => (
-              <tr key={v.id} className="border-t hover:bg-slate-50">
+            {ventas.map(v => {
+              const devuelta = v.estado === 'devuelta'
+              return (
+              <tr key={v.id} className={`border-t hover:bg-slate-50 ${devuelta ? 'bg-red-50/40 text-slate-400' : ''}`}>
                 <td className="p-3 text-slate-500 text-xs">
                   {new Date(v.created_at).toLocaleString('es-BO')}
                 </td>
                 <td className="p-3">
-                  <Badge variant={v.tipo_venta === 'moto' ? 'default' : 'secondary'}>
-                    {v.tipo_venta === 'moto' ? 'Moto' : 'Repuesto'}
-                  </Badge>
+                  <div className="flex items-center gap-1.5">
+                    <Badge variant={v.tipo_venta === 'moto' ? 'default' : 'secondary'}>
+                      {v.tipo_venta === 'moto' ? 'Moto' : 'Repuesto'}
+                    </Badge>
+                    {devuelta && <Badge variant="destructive">Devuelta</Badge>}
+                  </div>
                 </td>
                 <td className="p-3 max-w-xs text-slate-700">{detalleText(v) || <span className="text-slate-400">—</span>}</td>
                 <td className="p-3">{v.clientes?.nombre ?? <span className="text-slate-400">—</span>}</td>
                 <td className="p-3">{v.vendedor_nombre ?? v.perfiles?.nombre ?? <span className="text-slate-400">—</span>}</td>
-                <td className="p-3 text-right font-semibold">{formatBOB(v.total)}</td>
+                <td className={`p-3 text-right font-semibold ${devuelta ? 'line-through' : ''}`}>{formatBOB(v.total)}</td>
                 {isAdmin && (
-                  <td className="p-3 text-right text-green-600">{formatBOB(v.ganancia_neta)}</td>
+                  <td className={`p-3 text-right ${devuelta ? 'line-through' : 'text-green-600'}`}>{formatBOB(v.ganancia_neta)}</td>
                 )}
-                {isAdmin && onDelete && (
-                  <td className="p-3 text-center">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2"
-                      onClick={() => onDelete(v.id)}
-                      disabled={deletingId === v.id}
-                      title="Eliminar venta"
-                    >
-                      <Trash2 size={15} />
-                    </Button>
+                {isAdmin && (onDelete || onDevolver) && (
+                  <td className="p-3">
+                    <div className="flex items-center justify-center gap-1">
+                      {onDevolver && !devuelta && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 px-2"
+                          onClick={() => onDevolver(v.id)}
+                          disabled={devolviendoId === v.id}
+                          title="Registrar devolución"
+                        >
+                          <Undo2 size={15} />
+                        </Button>
+                      )}
+                      {onDelete && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2"
+                          onClick={() => onDelete(v.id)}
+                          disabled={deletingId === v.id}
+                          title="Eliminar venta"
+                        >
+                          <Trash2 size={15} />
+                        </Button>
+                      )}
+                    </div>
                   </td>
                 )}
               </tr>
-            ))}
+            )})}
             {ventas.length === 0 && (
               <tr><td colSpan={cols} className="p-6 text-center text-slate-400">Sin ventas</td></tr>
             )}

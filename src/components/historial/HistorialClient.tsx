@@ -38,6 +38,7 @@ export function HistorialClient({ ventas: ventasIniciales, isAdmin }: Props) {
   const [fecha, setFecha] = useState(hoy)
   const [ventas, setVentas] = useState(ventasIniciales)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [devolviendoId, setDevolviendoId] = useState<string | null>(null)
 
   const delDia = useMemo(
     () => ventas.filter(v => dateBOT(v.created_at) === fecha),
@@ -46,8 +47,9 @@ export function HistorialClient({ ventas: ventasIniciales, isAdmin }: Props) {
   const repuestos = delDia.filter(v => v.tipo_venta === 'repuesto')
   const motos = delDia.filter(v => v.tipo_venta === 'moto')
 
-  const totalDia = delDia.reduce((s, v) => s + (v.total ?? 0), 0)
-  const gananciaDia = delDia.reduce((s, v) => s + (v.ganancia_neta ?? 0), 0)
+  // Las ventas devueltas no cuentan para los totales del día.
+  const totalDia = delDia.reduce((s, v) => s + (v.estado === 'devuelta' ? 0 : v.total ?? 0), 0)
+  const gananciaDia = delDia.reduce((s, v) => s + (v.estado === 'devuelta' ? 0 : v.ganancia_neta ?? 0), 0)
 
   const quick = [
     { label: 'Hoy', value: hoy },
@@ -67,6 +69,22 @@ export function HistorialClient({ ventas: ventasIniciales, isAdmin }: Props) {
       toast.success('Venta eliminada y stock restaurado')
     }
     setDeletingId(null)
+  }
+
+  async function handleDevolver(id: string) {
+    if (!confirm('¿Registrar la devolución de esta venta? Se restaurará el stock y la venta no contará en los totales ni reportes.')) return
+    setDevolviendoId(id)
+    const supabase = createClient()
+    const { error } = await supabase.rpc('devolver_venta', { p_venta_id: id })
+    if (error) {
+      toast.error(`Error al devolver: ${error.message}`)
+    } else {
+      setVentas(prev => prev.map(v =>
+        v.id === id ? { ...v, estado: 'devuelta', devuelta_at: new Date().toISOString() } : v
+      ))
+      toast.success('Devolución registrada y stock restaurado')
+    }
+    setDevolviendoId(null)
   }
 
   return (
@@ -140,13 +158,13 @@ export function HistorialClient({ ventas: ventasIniciales, isAdmin }: Props) {
         </TabsList>
 
         <TabsContent value="total" className="mt-4">
-          <SalesTable ventas={delDia} isAdmin={isAdmin} onDelete={isAdmin ? handleDelete : undefined} deletingId={deletingId} />
+          <SalesTable ventas={delDia} isAdmin={isAdmin} onDelete={isAdmin ? handleDelete : undefined} deletingId={deletingId} onDevolver={isAdmin ? handleDevolver : undefined} devolviendoId={devolviendoId} />
         </TabsContent>
         <TabsContent value="repuestos" className="mt-4">
-          <SalesTable ventas={repuestos} isAdmin={isAdmin} onDelete={isAdmin ? handleDelete : undefined} deletingId={deletingId} />
+          <SalesTable ventas={repuestos} isAdmin={isAdmin} onDelete={isAdmin ? handleDelete : undefined} deletingId={deletingId} onDevolver={isAdmin ? handleDevolver : undefined} devolviendoId={devolviendoId} />
         </TabsContent>
         <TabsContent value="motos" className="mt-4">
-          <SalesTable ventas={motos} isAdmin={isAdmin} onDelete={isAdmin ? handleDelete : undefined} deletingId={deletingId} />
+          <SalesTable ventas={motos} isAdmin={isAdmin} onDelete={isAdmin ? handleDelete : undefined} deletingId={deletingId} onDevolver={isAdmin ? handleDevolver : undefined} devolviendoId={devolviendoId} />
         </TabsContent>
       </Tabs>
     </div>
