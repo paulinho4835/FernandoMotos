@@ -150,14 +150,17 @@ export function CheckoutModal({ open, onClose, mode, vendedorNombre, isAdmin }: 
         ? {
             cliente_id: clienteId,
             notas: notas || null,
+            vendedor_nombre: nombreVendedor,
             items: repuestoItems.map(i => ({
               producto_id: i.producto_id,
               cantidad: i.cantidad,
+              precio_unitario: i.precio_unitario,
             })),
           }
         : {
             cliente_id: clienteId,
             notas: notas || null,
+            vendedor_nombre: nombreVendedor,
             items: motoItems.map(i => ({
               moto_id: i.moto_id,
               cantidad: i.cantidad,
