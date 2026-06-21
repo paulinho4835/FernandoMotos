@@ -1,11 +1,15 @@
 import type { Venta } from '@/lib/types'
 import { formatBOB } from '@/lib/utils/formatCurrency'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Trash2 } from 'lucide-react'
 
 interface Props {
   ventas: Venta[]
   title?: string
   isAdmin?: boolean
+  onDelete?: (id: string) => void
+  deletingId?: string | null
 }
 
 function detalleText(v: Venta): string {
@@ -19,10 +23,11 @@ function detalleText(v: Venta): string {
   return parts.join(', ')
 }
 
-export function SalesTable({ ventas, title, isAdmin }: Props) {
+export function SalesTable({ ventas, title, isAdmin, onDelete, deletingId }: Props) {
   const totalVentas = ventas.reduce((s, v) => s + (v.total ?? 0), 0)
   const totalGanancia = ventas.reduce((s, v) => s + (v.ganancia_neta ?? 0), 0)
-  const cols = isAdmin ? 7 : 6
+  const extraCols = isAdmin ? 2 : 0 // ganancia + acciones
+  const cols = 6 + extraCols
 
   return (
     <div className="space-y-2">
@@ -40,6 +45,7 @@ export function SalesTable({ ventas, title, isAdmin }: Props) {
               <th className="text-left p-3">Vendedor</th>
               <th className="text-right p-3">Total</th>
               {isAdmin && <th className="text-right p-3">Ganancia</th>}
+              {isAdmin && <th className="p-3" />}
             </tr>
           </thead>
           <tbody>
@@ -60,6 +66,20 @@ export function SalesTable({ ventas, title, isAdmin }: Props) {
                 {isAdmin && (
                   <td className="p-3 text-right text-green-600">{formatBOB(v.ganancia_neta)}</td>
                 )}
+                {isAdmin && onDelete && (
+                  <td className="p-3 text-center">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2"
+                      onClick={() => onDelete(v.id)}
+                      disabled={deletingId === v.id}
+                      title="Eliminar venta"
+                    >
+                      <Trash2 size={15} />
+                    </Button>
+                  </td>
+                )}
               </tr>
             ))}
             {ventas.length === 0 && (
@@ -76,6 +96,7 @@ export function SalesTable({ ventas, title, isAdmin }: Props) {
                 {isAdmin && (
                   <td className="p-3 text-right text-green-700">{formatBOB(totalGanancia)}</td>
                 )}
+                {isAdmin && <td />}
               </tr>
             </tfoot>
           )}

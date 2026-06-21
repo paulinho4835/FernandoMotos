@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input'
 import { SalesTable } from '@/components/historial/SalesTable'
 import { formatBOB } from '@/lib/utils/formatCurrency'
 import { ShoppingBag, TrendingUp, DollarSign } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 // Bolivia is UTC-4 (no DST)
 function todayBOT() {
@@ -31,9 +33,11 @@ interface Props {
   isAdmin: boolean
 }
 
-export function HistorialClient({ ventas, isAdmin }: Props) {
+export function HistorialClient({ ventas: ventasIniciales, isAdmin }: Props) {
   const hoy = todayBOT()
   const [fecha, setFecha] = useState(hoy)
+  const [ventas, setVentas] = useState(ventasIniciales)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const delDia = useMemo(
     () => ventas.filter(v => dateBOT(v.created_at) === fecha),
@@ -50,6 +54,20 @@ export function HistorialClient({ ventas, isAdmin }: Props) {
     { label: 'Ayer', value: addDays(hoy, -1) },
     { label: 'Antes de ayer', value: addDays(hoy, -2) },
   ]
+
+  async function handleDelete(id: string) {
+    if (!confirm('¿Eliminar esta venta? Se restaurará el stock de los productos.')) return
+    setDeletingId(id)
+    const supabase = createClient()
+    const { error } = await supabase.rpc('eliminar_venta', { p_venta_id: id })
+    if (error) {
+      toast.error(`Error al eliminar: ${error.message}`)
+    } else {
+      setVentas(prev => prev.filter(v => v.id !== id))
+      toast.success('Venta eliminada y stock restaurado')
+    }
+    setDeletingId(null)
+  }
 
   return (
     <div className="space-y-6">
@@ -122,13 +140,13 @@ export function HistorialClient({ ventas, isAdmin }: Props) {
         </TabsList>
 
         <TabsContent value="total" className="mt-4">
-          <SalesTable ventas={delDia} isAdmin={isAdmin} />
+          <SalesTable ventas={delDia} isAdmin={isAdmin} onDelete={isAdmin ? handleDelete : undefined} deletingId={deletingId} />
         </TabsContent>
         <TabsContent value="repuestos" className="mt-4">
-          <SalesTable ventas={repuestos} isAdmin={isAdmin} />
+          <SalesTable ventas={repuestos} isAdmin={isAdmin} onDelete={isAdmin ? handleDelete : undefined} deletingId={deletingId} />
         </TabsContent>
         <TabsContent value="motos" className="mt-4">
-          <SalesTable ventas={motos} isAdmin={isAdmin} />
+          <SalesTable ventas={motos} isAdmin={isAdmin} onDelete={isAdmin ? handleDelete : undefined} deletingId={deletingId} />
         </TabsContent>
       </Tabs>
     </div>
