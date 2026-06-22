@@ -47,9 +47,10 @@ export function HistorialClient({ ventas: ventasIniciales, isAdmin }: Props) {
   const repuestos = delDia.filter(v => v.tipo_venta === 'repuesto')
   const motos = delDia.filter(v => v.tipo_venta === 'moto')
 
-  // Las ventas devueltas no cuentan para los totales del día.
-  const totalDia = delDia.reduce((s, v) => s + (v.estado === 'devuelta' ? 0 : v.total ?? 0), 0)
-  const gananciaDia = delDia.reduce((s, v) => s + (v.estado === 'devuelta' ? 0 : v.ganancia_neta ?? 0), 0)
+  // Las ventas devueltas o anuladas no cuentan para los totales del día.
+  const inactiva = (v: typeof ventas[number]) => v.estado === 'devuelta' || v.estado === 'anulada'
+  const totalDia = delDia.reduce((s, v) => s + (inactiva(v) ? 0 : v.total ?? 0), 0)
+  const gananciaDia = delDia.reduce((s, v) => s + (inactiva(v) ? 0 : v.ganancia_neta ?? 0), 0)
 
   const quick = [
     { label: 'Hoy', value: hoy },

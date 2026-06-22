@@ -25,10 +25,14 @@ function detalleText(v: Venta): string {
   return parts.join(', ')
 }
 
+function esInactiva(v: Venta) {
+  return v.estado === 'devuelta' || v.estado === 'anulada'
+}
+
 export function SalesTable({ ventas, title, isAdmin, onDelete, deletingId, onDevolver, devolviendoId }: Props) {
-  // Las ventas devueltas no suman en los totales.
-  const totalVentas = ventas.reduce((s, v) => s + (v.estado === 'devuelta' ? 0 : v.total ?? 0), 0)
-  const totalGanancia = ventas.reduce((s, v) => s + (v.estado === 'devuelta' ? 0 : v.ganancia_neta ?? 0), 0)
+  // Las ventas devueltas o anuladas no suman en los totales.
+  const totalVentas = ventas.reduce((s, v) => s + (esInactiva(v) ? 0 : v.total ?? 0), 0)
+  const totalGanancia = ventas.reduce((s, v) => s + (esInactiva(v) ? 0 : v.ganancia_neta ?? 0), 0)
   const extraCols = isAdmin ? 2 : 0 // ganancia + acciones
   const cols = 6 + extraCols
 
@@ -53,9 +57,9 @@ export function SalesTable({ ventas, title, isAdmin, onDelete, deletingId, onDev
           </thead>
           <tbody>
             {ventas.map(v => {
-              const devuelta = v.estado === 'devuelta'
+              const inactiva = esInactiva(v)
               return (
-              <tr key={v.id} className={`border-t hover:bg-slate-50 ${devuelta ? 'bg-red-50/40 text-slate-400' : ''}`}>
+              <tr key={v.id} className={`border-t hover:bg-slate-50 ${inactiva ? 'bg-red-50/40 text-slate-400' : ''}`}>
                 <td className="p-3 text-slate-500 text-xs">
                   {new Date(v.created_at).toLocaleString('es-BO')}
                 </td>
@@ -64,20 +68,21 @@ export function SalesTable({ ventas, title, isAdmin, onDelete, deletingId, onDev
                     <Badge variant={v.tipo_venta === 'moto' ? 'default' : 'secondary'}>
                       {v.tipo_venta === 'moto' ? 'Moto' : 'Repuesto'}
                     </Badge>
-                    {devuelta && <Badge variant="destructive">Devuelta</Badge>}
+                    {v.estado === 'devuelta' && <Badge variant="destructive">Devuelta</Badge>}
+                    {v.estado === 'anulada' && <Badge variant="destructive">Anulada</Badge>}
                   </div>
                 </td>
                 <td className="p-3 max-w-xs text-slate-700">{detalleText(v) || <span className="text-slate-400">—</span>}</td>
                 <td className="p-3">{v.clientes?.nombre ?? <span className="text-slate-400">—</span>}</td>
                 <td className="p-3">{v.vendedor_nombre ?? v.perfiles?.nombre ?? <span className="text-slate-400">—</span>}</td>
-                <td className={`p-3 text-right font-semibold ${devuelta ? 'line-through' : ''}`}>{formatBOB(v.total)}</td>
+                <td className={`p-3 text-right font-semibold ${inactiva ? 'line-through' : ''}`}>{formatBOB(v.total)}</td>
                 {isAdmin && (
-                  <td className={`p-3 text-right ${devuelta ? 'line-through' : 'text-green-600'}`}>{formatBOB(v.ganancia_neta)}</td>
+                  <td className={`p-3 text-right ${inactiva ? 'line-through' : 'text-green-600'}`}>{formatBOB(v.ganancia_neta)}</td>
                 )}
                 {isAdmin && (onDelete || onDevolver) && (
                   <td className="p-3">
                     <div className="flex items-center justify-center gap-1">
-                      {onDevolver && !devuelta && (
+                      {onDevolver && !inactiva && (
                         <Button
                           variant="ghost"
                           size="sm"
