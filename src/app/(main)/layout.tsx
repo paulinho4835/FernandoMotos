@@ -23,9 +23,9 @@ export default async function MainLayout({ children }: { children: React.ReactNo
     { href: '/inventario', label: 'Repuestos', icon: Package },
     { href: '/inventario/motos', label: 'Motos', icon: Bike },
     { href: '/historial', label: 'Ventas', icon: History },
-    { href: '/categorias', label: 'Categorías', icon: Tag },
     { href: '/clientes', label: 'Clientes', icon: Users },
     ...(isAdmin ? [
+      { href: '/categorias', label: 'Categorías', icon: Tag },
       { href: '/vendedores', label: 'Vendedores', icon: UserCog },
       { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { href: '/reportes', label: 'Reportes', icon: BarChart3 },

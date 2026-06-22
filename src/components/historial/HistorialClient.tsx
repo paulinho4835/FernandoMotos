@@ -9,6 +9,7 @@ import { formatBOB } from '@/lib/utils/formatCurrency'
 import { ShoppingBag, TrendingUp, DollarSign } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { ExportarCSV } from '@/components/historial/ExportarCSV'
 
 // Bolivia is UTC-4 (no DST)
 function todayBOT() {
@@ -116,6 +117,9 @@ export function HistorialClient({ ventas: ventasIniciales, isAdmin }: Props) {
         </div>
         <p className="text-sm text-slate-500 ml-auto capitalize">{labelFecha(fecha)}</p>
       </div>
+
+      {/* Exportar CSV — solo admin */}
+      {isAdmin && <ExportarCSV />}
 
       {/* Resumen del día */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
