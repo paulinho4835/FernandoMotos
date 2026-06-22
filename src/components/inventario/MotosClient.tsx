@@ -14,9 +14,10 @@ interface Props {
   isAdmin: boolean
   vendedorId: string
   vendedorNombre: string
+  negocioNombre: string
 }
 
-export function MotosClient({ motos, isAdmin, vendedorId, vendedorNombre }: Props) {
+export function MotosClient({ motos, isAdmin, vendedorId, vendedorNombre, negocioNombre }: Props) {
   const [pending, setPending] = useState<Moto | null>(null)
   const [pendingPrecio, setPendingPrecio] = useState('')
   const [checkoutOpen, setCheckoutOpen] = useState(false)
@@ -138,6 +139,7 @@ export function MotosClient({ motos, isAdmin, vendedorId, vendedorNombre }: Prop
         vendedorId={vendedorId}
         vendedorNombre={vendedorNombre}
         isAdmin={isAdmin}
+        negocioNombre={negocioNombre}
       />
     </div>
   )

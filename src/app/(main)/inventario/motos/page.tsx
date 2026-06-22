@@ -13,8 +13,10 @@ export default async function MotosPage() {
 
   const isAdmin = perfil?.rol === 'admin'
 
-  const { data: motos } = await supabase
-    .from('motos').select('*').eq('activo', true).order('marca')
+  const [{ data: motos }, { data: config }] = await Promise.all([
+    supabase.from('motos').select('*').eq('activo', true).order('marca'),
+    supabase.from('configuracion').select('nombre_negocio').eq('id', 1).single(),
+  ])
 
   return (
     <div className="p-6 space-y-4">
@@ -31,6 +33,7 @@ export default async function MotosPage() {
         isAdmin={isAdmin}
         vendedorId={user?.id ?? ''}
         vendedorNombre={perfil?.nombre ?? 'Vendedor'}
+        negocioNombre={config?.nombre_negocio ?? 'Importadora de Motos Fernando'}
       />
     </div>
   )

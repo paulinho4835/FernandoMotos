@@ -15,9 +15,10 @@ interface Props {
   isAdmin: boolean
   vendedorId: string
   vendedorNombre: string
+  negocioNombre: string
 }
 
-export function InventarioClient({ productos, categorias, isAdmin, vendedorId, vendedorNombre }: Props) {
+export function InventarioClient({ productos, categorias, isAdmin, vendedorId, vendedorNombre, negocioNombre }: Props) {
   const [activeTab, setActiveTab] = useState<string>('todos')
   const [search, setSearch] = useState('')
   const [filterMedInt, setFilterMedInt] = useState('')
@@ -286,6 +287,7 @@ export function InventarioClient({ productos, categorias, isAdmin, vendedorId, v
         vendedorId={vendedorId}
         vendedorNombre={vendedorNombre}
         isAdmin={isAdmin}
+        negocioNombre={negocioNombre}
       />
     </div>
   )

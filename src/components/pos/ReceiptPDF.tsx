@@ -26,13 +26,14 @@ interface ReceiptProps {
   clienteNombre?: string
   vendedorNombre: string
   fecha: string
+  negocioNombre?: string
 }
 
 function ReceiptDocument(props: ReceiptProps) {
   return (
     <Document>
       <Page size={[W, 800]} style={s.page}>
-        <Text style={s.title}>Importadora de Motos Fernando</Text>
+        <Text style={s.title}>{props.negocioNombre?.trim() || 'Importadora de Motos Fernando'}</Text>
         <View style={s.divider} />
 
         <View style={s.row}>

@@ -22,6 +22,7 @@ interface Props {
   vendedorId: string
   vendedorNombre: string
   isAdmin: boolean
+  negocioNombre: string
 }
 
 interface ClienteSugerido {
@@ -30,7 +31,7 @@ interface ClienteSugerido {
   telefono: string | null
 }
 
-export function CheckoutModal({ open, onClose, mode, vendedorNombre, isAdmin }: Props) {
+export function CheckoutModal({ open, onClose, mode, vendedorNombre, isAdmin, negocioNombre }: Props) {
   const router = useRouter()
   const repuestoItems = useCartStore(s => s.items)
   const repuestoTotal = useCartStore(s => s.total)
@@ -185,6 +186,7 @@ export function CheckoutModal({ open, onClose, mode, vendedorNombre, isAdmin }: 
       clienteNombre: clienteNombreFinal,
       vendedorNombre: nombreVendedor,
       fecha: new Date().toLocaleDateString('es-BO'),
+      negocioNombre,
     })
 
     if (mode === 'repuesto') { clearRepuesto() } else { clearMoto() }
