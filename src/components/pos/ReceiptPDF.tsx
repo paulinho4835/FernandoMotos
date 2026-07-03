@@ -27,6 +27,8 @@ interface ReceiptProps {
   vendedorNombre: string
   fecha: string
   negocioNombre?: string
+  negocioDireccion?: string
+  negocioTelefono?: string
 }
 
 function ReceiptDocument(props: ReceiptProps) {
@@ -34,6 +36,8 @@ function ReceiptDocument(props: ReceiptProps) {
     <Document>
       <Page size={[W, 800]} style={s.page}>
         <Text style={s.title}>{props.negocioNombre?.trim() || 'Importadora de Motos Fernando'}</Text>
+        {props.negocioDireccion?.trim() && <Text style={s.sub}>{props.negocioDireccion.trim()}</Text>}
+        {props.negocioTelefono?.trim() && <Text style={s.sub}>Tel: {props.negocioTelefono.trim()}</Text>}
         <View style={s.divider} />
 
         <View style={s.row}>
@@ -66,11 +70,16 @@ function ReceiptDocument(props: ReceiptProps) {
               <Text style={{ flex: 2, textAlign: 'right' }}>Subtotal</Text>
             </View>
             {props.repuestoItems.map(item => (
-              <View key={item.producto_id} style={s.row}>
-                <Text style={{ flex: 4 }}>{item.nombre}</Text>
-                <Text style={{ flex: 1, textAlign: 'center' }}>{item.cantidad}</Text>
-                <Text style={{ flex: 2, textAlign: 'right' }}>{formatBOB(item.precio_unitario)}</Text>
-                <Text style={{ flex: 2, textAlign: 'right' }}>{formatBOB(item.precio_unitario * item.cantidad)}</Text>
+              <View key={item.producto_id} style={{ marginBottom: 1 }}>
+                <View style={s.row}>
+                  <Text style={{ flex: 4 }}>{item.nombre}</Text>
+                  <Text style={{ flex: 1, textAlign: 'center' }}>{item.cantidad}</Text>
+                  <Text style={{ flex: 2, textAlign: 'right' }}>{formatBOB(item.precio_unitario)}</Text>
+                  <Text style={{ flex: 2, textAlign: 'right' }}>{formatBOB(item.precio_unitario * item.cantidad)}</Text>
+                </View>
+                {item.medida && (
+                  <Text style={{ fontSize: 7, color: '#666' }}>Medida: {item.medida}</Text>
+                )}
               </View>
             ))}
           </>

@@ -1,22 +1,32 @@
 'use client'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Categoria } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Trash2, Edit, Plus, X, Check } from 'lucide-react'
+import { Trash2, Edit, Plus, X, Check, Search } from 'lucide-react'
 
 interface Props { categorias: Categoria[] }
 
 export function CategoriasClient({ categorias: initial }: Props) {
   const [categorias, setCategorias] = useState(initial)
+  const [search, setSearch] = useState('')
   const [creating, setCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [nombre, setNombre] = useState('')
   const [descripcion, setDescripcion] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim()
+    if (!q) return categorias
+    return categorias.filter(c =>
+      c.nombre.toLowerCase().includes(q) ||
+      (c.descripcion ?? '').toLowerCase().includes(q)
+    )
+  }, [categorias, search])
 
   async function create() {
     if (!nombre.trim()) return
@@ -66,6 +76,15 @@ export function CategoriasClient({ categorias: initial }: Props) {
 
   return (
     <div className="space-y-4 max-w-xl">
+      <div className="relative">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        <Input
+          placeholder="Buscar categoría..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="pl-9"
+        />
+      </div>
       <div className="rounded-md border overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-slate-600">
@@ -76,7 +95,7 @@ export function CategoriasClient({ categorias: initial }: Props) {
             </tr>
           </thead>
           <tbody>
-            {categorias.map(cat => (
+            {filtered.map(cat => (
               <tr key={cat.id} className="border-t hover:bg-slate-50">
                 {editingId === cat.id ? (
                   <>
@@ -116,9 +135,11 @@ export function CategoriasClient({ categorias: initial }: Props) {
                 )}
               </tr>
             ))}
-            {categorias.length === 0 && (
+            {filtered.length === 0 && (
               <tr>
-                <td colSpan={3} className="p-6 text-center text-slate-400">Sin categorías</td>
+                <td colSpan={3} className="p-6 text-center text-slate-400">
+                  {search ? 'Ninguna categoría coincide con la búsqueda' : 'Sin categorías'}
+                </td>
               </tr>
             )}
           </tbody>

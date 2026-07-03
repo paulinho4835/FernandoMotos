@@ -4,7 +4,7 @@ import { formatBOB } from '@/lib/utils/formatCurrency'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Edit, ShoppingCart } from 'lucide-react'
+import { Edit, ShoppingCart, Bike } from 'lucide-react'
 
 interface Props {
   motos: Moto[]
@@ -18,10 +18,13 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart }: Props) {
       <table className="w-full text-sm">
         <thead className="bg-slate-50 text-slate-600">
           <tr>
-            <th className="text-left p-3">Código</th>
-            <th className="text-left p-3">Marca / Modelo</th>
-            <th className="text-left p-3">Año</th>
+            <th className="p-3 w-14" />
+            <th className="text-left p-3">Modelo</th>
+            <th className="text-left p-3">Marca</th>
             <th className="text-left p-3">Color</th>
+            <th className="text-left p-3">Año</th>
+            <th className="text-left p-3">Chasis</th>
+            <th className="text-left p-3">Motor</th>
             <th className="text-left p-3">Stock</th>
             <th className="text-left p-3">Precio Referencial</th>
             <th className="p-3" />
@@ -30,10 +33,22 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart }: Props) {
         <tbody>
           {motos.map(m => (
             <tr key={m.id} className="border-t hover:bg-slate-50">
-              <td className="p-3 font-mono text-xs">{m.codigo}</td>
-              <td className="p-3">{m.marca} {m.modelo}</td>
-              <td className="p-3">{m.anio ?? '—'}</td>
+              <td className="p-3">
+                {m.fotos?.[0] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={m.fotos[0]} alt={`${m.marca} ${m.modelo}`} className="w-10 h-10 rounded object-cover" />
+                ) : (
+                  <div className="w-10 h-10 rounded bg-slate-100 flex items-center justify-center text-slate-300">
+                    <Bike size={18} />
+                  </div>
+                )}
+              </td>
+              <td className="p-3">{m.modelo}</td>
+              <td className="p-3">{m.marca}</td>
               <td className="p-3">{m.color ?? '—'}</td>
+              <td className="p-3">{m.anio ?? '—'}</td>
+              <td className="p-3 font-mono text-xs">{m.numero_chasis ?? '—'}</td>
+              <td className="p-3 font-mono text-xs">{m.numero_motor ?? '—'}</td>
               <td className="p-3">
                 <span className={m.stock <= m.stock_minimo ? 'text-red-600 font-semibold' : ''}>
                   {m.stock}
@@ -60,7 +75,7 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart }: Props) {
             </tr>
           ))}
           {motos.length === 0 && (
-            <tr><td colSpan={7} className="p-6 text-center text-slate-400">Sin motos</td></tr>
+            <tr><td colSpan={10} className="p-6 text-center text-slate-400">Sin motos</td></tr>
           )}
         </tbody>
       </table>

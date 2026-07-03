@@ -22,7 +22,7 @@ export function ProductSearch() {
     const supabase = createClient()
     const { data } = await supabase
       .from('productos')
-      .select('id, codigo, nombre, descripcion, costo, precio_venta, precio_referencial, medida_interna, medida_externa, altura, stock, stock_minimo, ubicacion, compatibilidad, categoria_id, activo, created_at, updated_at')
+      .select('id, codigo, nombre, descripcion, costo, precio_venta, precio_referencial, medida, stock, stock_minimo, ubicacion, compatibilidad, categoria_id, activo, created_at, updated_at')
       .eq('activo', true)
       .or(`codigo.ilike.%${q}%,nombre.ilike.%${q}%`)
       .order('nombre')
@@ -38,6 +38,10 @@ export function ProductSearch() {
   }
 
   function selectProduct(p: Producto) {
+    if (p.stock <= 0) {
+      alert(`"${p.nombre || p.codigo}" no tiene stock disponible.`)
+      return
+    }
     setPending(p)
     setPrecio(p.precio_referencial?.toString() ?? p.precio_venta?.toString() ?? '')
     setCantidad('1')
@@ -54,6 +58,7 @@ export function ProductSearch() {
       producto_id: pending.id,
       codigo: pending.codigo,
       nombre: pending.nombre,
+      medida: pending.medida,
       precio_unitario: precioNum,
       costo_unitario: pending.costo,
       stock: pending.stock,
@@ -81,18 +86,14 @@ export function ProductSearch() {
           <div className="absolute z-10 top-full mt-1 w-full bg-white border rounded-md shadow-lg max-h-64 overflow-auto">
             {results.map(p => (
               <button key={p.id} onClick={() => selectProduct(p)}
-                className="w-full text-left px-4 py-2 hover:bg-slate-50 flex justify-between items-center">
+                disabled={p.stock <= 0}
+                className="w-full text-left px-4 py-2 hover:bg-slate-50 flex justify-between items-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent">
                 <div>
                   <p className="font-medium text-sm">{p.nombre || p.codigo}</p>
                   <p className="text-xs text-slate-500">
                     {p.codigo} · Stock: {p.stock}
-                    {(p.medida_interna || p.medida_externa || p.altura) && (
-                      <> · {[
-                        p.medida_interna && `Int: ${p.medida_interna}`,
-                        p.medida_externa && `Ext: ${p.medida_externa}`,
-                        p.altura && `Alt: ${p.altura}`,
-                      ].filter(Boolean).join(' / ')}</>
-                    )}
+                    {p.stock <= 0 && <span className="text-red-500 font-medium"> · Sin stock</span>}
+                    {p.medida && <> · {p.medida}</>}
                   </p>
                 </div>
                 {p.precio_referencial && (

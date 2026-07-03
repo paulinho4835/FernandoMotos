@@ -15,7 +15,7 @@ export default async function InventarioPage() {
   const [{ data: productos }, { data: categorias }, { data: config }] = await Promise.all([
     supabase.from('productos').select('*').eq('activo', true).order('nombre'),
     supabase.from('categorias').select('*').eq('activo', true).order('orden').order('nombre'),
-    supabase.from('configuracion').select('nombre_negocio').eq('id', 1).single(),
+    supabase.from('configuracion').select('nombre_negocio, direccion, telefono').eq('id', 1).single(),
   ])
 
   return (
@@ -35,6 +35,8 @@ export default async function InventarioPage() {
         vendedorId={user?.id ?? ''}
         vendedorNombre={perfil?.nombre ?? 'Vendedor'}
         negocioNombre={config?.nombre_negocio ?? 'Importadora de Motos Fernando'}
+        negocioDireccion={config?.direccion ?? ''}
+        negocioTelefono={config?.telefono ?? ''}
       />
     </div>
   )

@@ -6,6 +6,7 @@ import { ProductTable } from './ProductTable'
 import { CheckoutModal } from '@/components/pos/CheckoutModal'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { formatBOB } from '@/lib/utils/formatCurrency'
 import { Search, ShoppingCart, X, Trash2 } from 'lucide-react'
 
@@ -16,14 +17,14 @@ interface Props {
   vendedorId: string
   vendedorNombre: string
   negocioNombre: string
+  negocioDireccion: string
+  negocioTelefono: string
 }
 
-export function InventarioClient({ productos, categorias, isAdmin, vendedorId, vendedorNombre, negocioNombre }: Props) {
+export function InventarioClient({ productos, categorias, isAdmin, vendedorId, vendedorNombre, negocioNombre, negocioDireccion, negocioTelefono }: Props) {
   const [activeTab, setActiveTab] = useState<string>('todos')
   const [search, setSearch] = useState('')
-  const [filterMedInt, setFilterMedInt] = useState('')
-  const [filterMedExt, setFilterMedExt] = useState('')
-  const [filterAltura, setFilterAltura] = useState('')
+  const [filterMedida, setFilterMedida] = useState('')
 
   // Pending product for adding to cart
   const [pending, setPending] = useState<Producto | null>(null)
@@ -41,6 +42,10 @@ export function InventarioClient({ productos, categorias, isAdmin, vendedorId, v
   const clearCart = useCartStore(s => s.clear)
 
   function handleAddToCart(p: Producto) {
+    if (p.stock <= 0) {
+      alert(`"${p.nombre || p.codigo}" no tiene stock disponible.`)
+      return
+    }
     setPending(p)
     setPendingPrecio(p.precio_referencial?.toString() ?? (p.precio_venta ? p.precio_venta.toString() : ''))
     setPendingCantidad('1')
@@ -55,6 +60,7 @@ export function InventarioClient({ productos, categorias, isAdmin, vendedorId, v
       producto_id: pending.id,
       codigo: pending.codigo,
       nombre: pending.nombre,
+      medida: pending.medida,
       precio_unitario: precio,
       costo_unitario: pending.costo,
       stock: pending.stock,
@@ -84,28 +90,18 @@ export function InventarioClient({ productos, categorias, isAdmin, vendedorId, v
         p.codigo.toLowerCase().includes(q) ||
         (p.nombre ?? '').toLowerCase().includes(q) ||
         (p.descripcion ?? '').toLowerCase().includes(q) ||
-        (p.medida_interna ?? '').toLowerCase().includes(q) ||
-        (p.medida_externa ?? '').toLowerCase().includes(q) ||
-        (p.altura ?? '').toLowerCase().includes(q) ||
+        (p.medida ?? '').toLowerCase().includes(q) ||
         p.compatibilidad.some(c => c.toLowerCase().includes(q))
       )
     }
 
-    if (filterMedInt.trim()) {
-      const q = filterMedInt.toLowerCase().trim()
-      list = list.filter(p => (p.medida_interna ?? '').toLowerCase().includes(q))
-    }
-    if (filterMedExt.trim()) {
-      const q = filterMedExt.toLowerCase().trim()
-      list = list.filter(p => (p.medida_externa ?? '').toLowerCase().includes(q))
-    }
-    if (filterAltura.trim()) {
-      const q = filterAltura.toLowerCase().trim()
-      list = list.filter(p => (p.altura ?? '').toLowerCase().includes(q))
+    if (filterMedida.trim()) {
+      const q = filterMedida.toLowerCase().trim()
+      list = list.filter(p => (p.medida ?? '').toLowerCase().includes(q))
     }
 
     return list
-  }, [productos, activeTab, search, filterMedInt, filterMedExt, filterAltura])
+  }, [productos, activeTab, search, filterMedida])
 
   const sinCategoria = productos.filter(p => !p.categoria_id).length
   const categoriasCon = categorias.filter(c => productos.some(p => p.categoria_id === c.id))
@@ -124,49 +120,23 @@ export function InventarioClient({ productos, categorias, isAdmin, vendedorId, v
               className="pl-9"
             />
           </div>
-          {(search || filterMedInt || filterMedExt || filterAltura) && (
+          {(search || filterMedida) && (
             <p className="text-sm text-slate-500">
               {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
             </p>
           )}
         </div>
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-xs font-medium text-slate-500 whitespace-nowrap">Filtrar por medidas:</span>
+          <span className="text-xs font-medium text-slate-500 whitespace-nowrap">Filtrar por medida:</span>
           <div className="relative">
             <Input
-              placeholder="Med. interna"
-              value={filterMedInt}
-              onChange={e => setFilterMedInt(e.target.value)}
+              placeholder="ej: 14cm"
+              value={filterMedida}
+              onChange={e => setFilterMedida(e.target.value)}
               className="w-32 h-8 text-xs pr-6"
             />
-            {filterMedInt && (
-              <button onClick={() => setFilterMedInt('')} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                <X size={12} />
-              </button>
-            )}
-          </div>
-          <div className="relative">
-            <Input
-              placeholder="Med. externa"
-              value={filterMedExt}
-              onChange={e => setFilterMedExt(e.target.value)}
-              className="w-32 h-8 text-xs pr-6"
-            />
-            {filterMedExt && (
-              <button onClick={() => setFilterMedExt('')} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                <X size={12} />
-              </button>
-            )}
-          </div>
-          <div className="relative">
-            <Input
-              placeholder="Altura"
-              value={filterAltura}
-              onChange={e => setFilterAltura(e.target.value)}
-              className="w-28 h-8 text-xs pr-6"
-            />
-            {filterAltura && (
-              <button onClick={() => setFilterAltura('')} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            {filterMedida && (
+              <button onClick={() => setFilterMedida('')} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                 <X size={12} />
               </button>
             )}
@@ -174,23 +144,26 @@ export function InventarioClient({ productos, categorias, isAdmin, vendedorId, v
         </div>
       </div>
 
-      <div className="flex gap-1.5 flex-wrap">
-        <Tab active={activeTab === 'todos'} onClick={() => setActiveTab('todos')}>
-          Todos ({productos.length})
-        </Tab>
-        {categoriasCon.map(c => {
-          const count = productos.filter(p => p.categoria_id === c.id).length
-          return (
-            <Tab key={c.id} active={activeTab === c.id} onClick={() => setActiveTab(c.id)}>
-              {c.nombre} ({count})
-            </Tab>
-          )
-        })}
-        {sinCategoria > 0 && (
-          <Tab active={activeTab === 'sin_categoria'} onClick={() => setActiveTab('sin_categoria')}>
-            Sin categoría ({sinCategoria})
-          </Tab>
-        )}
+      <div className="w-full sm:max-w-xs">
+        <Select value={activeTab} onValueChange={setActiveTab}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos ({productos.length})</SelectItem>
+            {categoriasCon.map(c => {
+              const count = productos.filter(p => p.categoria_id === c.id).length
+              return (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.nombre} ({count})
+                </SelectItem>
+              )
+            })}
+            {sinCategoria > 0 && (
+              <SelectItem value="sin_categoria">Sin categoría ({sinCategoria})</SelectItem>
+            )}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Panel de precio al seleccionar producto */}
@@ -288,22 +261,9 @@ export function InventarioClient({ productos, categorias, isAdmin, vendedorId, v
         vendedorNombre={vendedorNombre}
         isAdmin={isAdmin}
         negocioNombre={negocioNombre}
+        negocioDireccion={negocioDireccion}
+        negocioTelefono={negocioTelefono}
       />
     </div>
-  )
-}
-
-function Tab({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border ${
-        active
-          ? 'bg-slate-900 text-white border-slate-900'
-          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
-      }`}
-    >
-      {children}
-    </button>
   )
 }

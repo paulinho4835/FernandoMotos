@@ -49,9 +49,7 @@ export function ProductForm({ producto, categorias = [] }: Props) {
     stock_minimo:       producto?.stock_minimo?.toString() ?? '5',
     ubicacion:          producto?.ubicacion ?? '',
     compatibilidad:     producto?.compatibilidad?.join(', ') ?? '',
-    medida_interna:     producto?.medida_interna ?? '',
-    medida_externa:     producto?.medida_externa ?? '',
-    altura:             producto?.altura ?? '',
+    medida:             producto?.medida ?? '',
     categoria_id:       producto?.categoria_id ?? '',
   })
 
@@ -76,9 +74,7 @@ export function ProductForm({ producto, categorias = [] }: Props) {
       stock_minimo:       parseInt(form.stock_minimo),
       ubicacion:          form.ubicacion || null,
       compatibilidad:     form.compatibilidad.split(',').map(s => s.trim()).filter(Boolean),
-      medida_interna:     form.medida_interna || null,
-      medida_externa:     form.medida_externa || null,
-      altura:             form.altura || null,
+      medida:             form.medida || null,
       categoria_id:       form.categoria_id || null,
     }
     let err
@@ -160,21 +156,10 @@ export function ProductForm({ producto, categorias = [] }: Props) {
         ))}
       </div>
 
-      {/* Medidas (opcionales) */}
-      <div className="space-y-4">
-        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Medidas <span className="text-xs font-normal normal-case">(opcional)</span></h2>
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: 'Medida Interna', field: 'medida_interna' },
-            { label: 'Medida Externa', field: 'medida_externa' },
-            { label: 'Altura',         field: 'altura' },
-          ].map(({ label, field }) => (
-            <div key={field} className="space-y-1">
-              <Label className="text-xs">{label}</Label>
-              <Input value={form[field as keyof typeof form]} onChange={e => set(field, e.target.value)} placeholder="ej: 25mm" />
-            </div>
-          ))}
-        </div>
+      {/* Medida (opcional) */}
+      <div className="space-y-1">
+        <Label>Medida <span className="text-xs text-slate-400">(opcional)</span></Label>
+        <Input value={form.medida} onChange={e => set('medida', e.target.value)} placeholder="ej: 14cm" />
       </div>
 
       {/* Precios — solo admin ve este formulario */}

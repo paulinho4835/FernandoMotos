@@ -43,9 +43,7 @@ export interface Producto {
   costo: number
   precio_venta: number
   precio_referencial: number | null
-  medida_interna: string | null
-  medida_externa: string | null
-  altura: string | null
+  medida: string | null
   stock: number
   stock_minimo: number
   ubicacion: string | null
@@ -72,6 +70,7 @@ export interface Moto {
   stock: number
   stock_minimo: number
   descripcion: string | null
+  fotos: string[]
   activo: boolean
   created_at: string
   updated_at: string
@@ -126,6 +125,7 @@ export interface CartItemRepuesto {
   producto_id: string
   codigo: string
   nombre: string
+  medida?: string | null
   precio_unitario: number
   costo_unitario: number
   cantidad: number

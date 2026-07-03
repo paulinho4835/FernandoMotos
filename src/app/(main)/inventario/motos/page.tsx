@@ -15,7 +15,7 @@ export default async function MotosPage() {
 
   const [{ data: motos }, { data: config }] = await Promise.all([
     supabase.from('motos').select('*').eq('activo', true).order('marca'),
-    supabase.from('configuracion').select('nombre_negocio').eq('id', 1).single(),
+    supabase.from('configuracion').select('nombre_negocio, direccion, telefono').eq('id', 1).single(),
   ])
 
   return (
@@ -34,6 +34,8 @@ export default async function MotosPage() {
         vendedorId={user?.id ?? ''}
         vendedorNombre={perfil?.nombre ?? 'Vendedor'}
         negocioNombre={config?.nombre_negocio ?? 'Importadora de Motos Fernando'}
+        negocioDireccion={config?.direccion ?? ''}
+        negocioTelefono={config?.telefono ?? ''}
       />
     </div>
   )

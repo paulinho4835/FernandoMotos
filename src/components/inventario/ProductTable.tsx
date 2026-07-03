@@ -49,7 +49,10 @@ export function ProductTable({ productos, isAdmin = false, onAddToCart }: Props)
           <tr>
             <th className="text-left p-3">Código</th>
             <th className="text-left p-3">Nombre</th>
+            <th className="text-left p-3">Marca</th>
+            <th className="text-left p-3">Medida</th>
             <th className="text-left p-3">Stock</th>
+            <th className="text-left p-3">Crítico</th>
             {isAdmin && <th className="text-left p-3">Costo</th>}
             <th className="text-left p-3">P. Referencial</th>
             <th className="text-left p-3">Ubicación</th>
@@ -62,17 +65,10 @@ export function ProductTable({ productos, isAdmin = false, onAddToCart }: Props)
             <tr key={p.id} className="border-t hover:bg-slate-50">
               <td className="p-3 font-mono text-xs">{p.codigo}</td>
               <td className="p-3">
-                <div>{p.nombre || <span className="text-slate-400 italic">Sin nombre</span>}</div>
-                {(p.medida_interna || p.medida_externa || p.altura) && (
-                  <div className="text-xs text-slate-400 mt-0.5">
-                    {[
-                      p.medida_interna && `Int: ${p.medida_interna}`,
-                      p.medida_externa && `Ext: ${p.medida_externa}`,
-                      p.altura && `Alt: ${p.altura}`,
-                    ].filter(Boolean).join(' · ')}
-                  </div>
-                )}
+                {p.nombre || <span className="text-slate-400 italic">Sin nombre</span>}
               </td>
+              <td className="p-3 text-slate-500">{p.marca || '—'}</td>
+              <td className="p-3 text-slate-500">{p.medida || '—'}</td>
               <td className="p-3">
                 {stockEntryId === p.id ? (
                   <div className="flex items-center gap-1">
@@ -97,9 +93,6 @@ export function ProductTable({ productos, isAdmin = false, onAddToCart }: Props)
                     <span className={p.stock <= p.stock_minimo && p.stock_minimo > 0 ? 'text-red-600 font-semibold' : ''}>
                       {p.stock}
                     </span>
-                    {p.stock <= p.stock_minimo && p.stock_minimo > 0 && (
-                      <Badge variant="destructive" className="text-xs">Crítico</Badge>
-                    )}
                     {isAdmin && (
                       <button
                         onClick={() => { setStockEntryId(p.id); setStockQty('') }}
@@ -110,6 +103,11 @@ export function ProductTable({ productos, isAdmin = false, onAddToCart }: Props)
                       </button>
                     )}
                   </div>
+                )}
+              </td>
+              <td className="p-3">
+                {p.stock <= p.stock_minimo && p.stock_minimo > 0 && (
+                  <Badge variant="destructive" className="text-xs">Crítico</Badge>
                 )}
               </td>
               {isAdmin && (
@@ -127,8 +125,14 @@ export function ProductTable({ productos, isAdmin = false, onAddToCart }: Props)
               <td className="p-3">
                 <div className="flex items-center gap-1">
                   {onAddToCart && (
-                    <Button size="sm" variant="ghost" title="Agregar al carrito" onClick={() => onAddToCart(p)}>
-                      <ShoppingCart size={14} className="text-green-600" />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      title={p.stock <= 0 ? 'Sin stock disponible' : 'Agregar al carrito'}
+                      disabled={p.stock <= 0}
+                      onClick={() => onAddToCart(p)}
+                    >
+                      <ShoppingCart size={14} className={p.stock <= 0 ? 'text-slate-300' : 'text-green-600'} />
                     </Button>
                   )}
                   {isAdmin && (
@@ -141,7 +145,7 @@ export function ProductTable({ productos, isAdmin = false, onAddToCart }: Props)
             </tr>
           ))}
           {productos.length === 0 && (
-            <tr><td colSpan={isAdmin ? 8 : 7} className="p-6 text-center text-slate-400">Sin productos</td></tr>
+            <tr><td colSpan={isAdmin ? 11 : 10} className="p-6 text-center text-slate-400">Sin productos</td></tr>
           )}
         </tbody>
       </table>

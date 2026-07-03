@@ -11,7 +11,7 @@ interface DetalleRepuesto {
   cantidad: number
   precio_unitario: number
   subtotal: number
-  productos: { codigo: string; nombre: string } | null
+  productos: { codigo: string; nombre: string; marca: string | null; medida: string | null } | null
 }
 
 interface DetalleMoto {
@@ -67,7 +67,7 @@ export function ClientesClient({ clientes }: Props) {
       .select(`
         id, tipo_venta, total, created_at,
         perfiles(nombre),
-        detalle_ventas(id, cantidad, precio_unitario, subtotal, productos(codigo, nombre)),
+        detalle_ventas(id, cantidad, precio_unitario, subtotal, productos(codigo, nombre, marca, medida)),
         detalle_ventas_motos(id, cantidad, precio_unitario, subtotal, motos(marca, modelo, anio))
       `)
       .eq('cliente_id', c.id)
@@ -190,11 +190,21 @@ export function ClientesClient({ clientes }: Props) {
                       {expandedVenta === v.id && (
                         <div className="mt-2 ml-5 space-y-1">
                           {v.tipo_venta === 'repuesto' && v.detalle_ventas.map(d => (
-                            <div key={d.id} className="flex justify-between text-xs text-slate-600">
-                              <span>
-                                {d.productos?.nombre || d.productos?.codigo || '—'}
-                                {d.cantidad > 1 && <span className="text-slate-400"> ×{d.cantidad}</span>}
-                              </span>
+                            <div key={d.id} className="flex justify-between text-xs text-slate-600 gap-2">
+                              <div>
+                                <div>
+                                  {d.productos?.nombre || d.productos?.codigo || '—'}
+                                  {d.cantidad > 1 && <span className="text-slate-400"> ×{d.cantidad}</span>}
+                                </div>
+                                <div className="text-slate-400">
+                                  {[
+                                    d.productos?.codigo && `Cód: ${d.productos.codigo}`,
+                                    d.productos?.marca,
+                                    d.productos?.medida,
+                                  ].filter(Boolean).join(' · ')}
+                                </div>
+                                <div className="text-slate-400">P. unitario: {formatBOB(d.precio_unitario)}</div>
+                              </div>
                               <span className="font-medium shrink-0 ml-2">{formatBOB(d.subtotal)}</span>
                             </div>
                           ))}

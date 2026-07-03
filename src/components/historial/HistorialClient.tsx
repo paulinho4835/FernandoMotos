@@ -36,14 +36,33 @@ interface Props {
 
 export function HistorialClient({ ventas: ventasIniciales, isAdmin }: Props) {
   const hoy = todayBOT()
-  const [fecha, setFecha] = useState(hoy)
+  const [fechaDesde, setFechaDesde] = useState(hoy)
+  const [fechaHasta, setFechaHasta] = useState(hoy)
   const [ventas, setVentas] = useState(ventasIniciales)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [devolviendoId, setDevolviendoId] = useState<string | null>(null)
 
+  function handleFechaDesde(v: string) {
+    const val = v || hoy
+    setFechaDesde(val)
+    if (val > fechaHasta) setFechaHasta(val)
+  }
+  function handleFechaHasta(v: string) {
+    const val = v || hoy
+    setFechaHasta(val)
+    if (val < fechaDesde) setFechaDesde(val)
+  }
+  function setRango(desde: string, hasta: string) {
+    setFechaDesde(desde)
+    setFechaHasta(hasta)
+  }
+
   const delDia = useMemo(
-    () => ventas.filter(v => dateBOT(v.created_at) === fecha),
-    [ventas, fecha]
+    () => ventas.filter(v => {
+      const f = dateBOT(v.created_at)
+      return f >= fechaDesde && f <= fechaHasta
+    }),
+    [ventas, fechaDesde, fechaHasta]
   )
   const repuestos = delDia.filter(v => v.tipo_venta === 'repuesto')
   const motos = delDia.filter(v => v.tipo_venta === 'moto')
@@ -54,9 +73,11 @@ export function HistorialClient({ ventas: ventasIniciales, isAdmin }: Props) {
   const gananciaDia = delDia.reduce((s, v) => s + (inactiva(v) ? 0 : v.ganancia_neta ?? 0), 0)
 
   const quick = [
-    { label: 'Hoy', value: hoy },
-    { label: 'Ayer', value: addDays(hoy, -1) },
-    { label: 'Antes de ayer', value: addDays(hoy, -2) },
+    { label: 'Hoy', desde: hoy, hasta: hoy },
+    { label: 'Ayer', desde: addDays(hoy, -1), hasta: addDays(hoy, -1) },
+    { label: 'Antes de ayer', desde: addDays(hoy, -2), hasta: addDays(hoy, -2) },
+    { label: 'Últimos 7 días', desde: addDays(hoy, -6), hasta: hoy },
+    { label: 'Últimos 30 días', desde: addDays(hoy, -29), hasta: hoy },
   ]
 
   async function handleDelete(id: string) {
@@ -94,28 +115,40 @@ export function HistorialClient({ ventas: ventasIniciales, isAdmin }: Props) {
       {/* Filtro de fecha */}
       <div className="flex flex-wrap items-end gap-3 rounded-xl border bg-white p-4">
         <div className="space-y-1">
-          <label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Fecha</label>
+          <label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Desde</label>
           <Input
             type="date"
-            value={fecha}
+            value={fechaDesde}
             max={hoy}
-            onChange={e => setFecha(e.target.value || hoy)}
+            onChange={e => handleFechaDesde(e.target.value)}
             className="w-44"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="space-y-1">
+          <label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Hasta</label>
+          <Input
+            type="date"
+            value={fechaHasta}
+            max={hoy}
+            onChange={e => handleFechaHasta(e.target.value)}
+            className="w-44"
+          />
+        </div>
+        <div className="flex gap-2 flex-wrap">
           {quick.map(q => (
             <Button
-              key={q.value}
-              variant={fecha === q.value ? 'default' : 'outline'}
+              key={q.label}
+              variant={fechaDesde === q.desde && fechaHasta === q.hasta ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setFecha(q.value)}
+              onClick={() => setRango(q.desde, q.hasta)}
             >
               {q.label}
             </Button>
           ))}
         </div>
-        <p className="text-sm text-slate-500 ml-auto capitalize">{labelFecha(fecha)}</p>
+        <p className="text-sm text-slate-500 ml-auto capitalize">
+          {fechaDesde === fechaHasta ? labelFecha(fechaDesde) : `${labelFecha(fechaDesde)} — ${labelFecha(fechaHasta)}`}
+        </p>
       </div>
 
       {/* Exportar CSV — solo admin */}

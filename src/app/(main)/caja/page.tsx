@@ -8,7 +8,7 @@ export default async function CajaPage() {
   if (!user) redirect('/login')
   const [{ data: perfil }, { data: config }] = await Promise.all([
     supabase.from('perfiles').select('nombre, rol').eq('id', user.id).single(),
-    supabase.from('configuracion').select('nombre_negocio').eq('id', 1).single(),
+    supabase.from('configuracion').select('nombre_negocio, direccion, telefono').eq('id', 1).single(),
   ])
 
   return (
@@ -17,6 +17,8 @@ export default async function CajaPage() {
       vendedorNombre={perfil?.nombre ?? 'Vendedor'}
       isAdmin={perfil?.rol === 'admin'}
       negocioNombre={config?.nombre_negocio ?? 'Importadora de Motos Fernando'}
+      negocioDireccion={config?.direccion ?? ''}
+      negocioTelefono={config?.telefono ?? ''}
     />
   )
 }

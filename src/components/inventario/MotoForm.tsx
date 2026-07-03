@@ -6,6 +6,7 @@ import type { Moto } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { MotoFotos } from './MotoFotos'
 
 interface Props { moto?: Moto }
 
@@ -14,15 +15,15 @@ export function MotoForm({ moto }: Props) {
   const isEdit = Boolean(moto)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [fotos, setFotos] = useState<string[]>(moto?.fotos ?? [])
   const [form, setForm] = useState({
-    codigo: moto?.codigo ?? '',
     marca: moto?.marca ?? '',
     modelo: moto?.modelo ?? '',
-    anio: moto?.anio?.toString() ?? '',
     color: moto?.color ?? '',
-    motor_cc: moto?.motor_cc?.toString() ?? '',
-    numero_motor: moto?.numero_motor ?? '',
+    anio: moto?.anio?.toString() ?? '',
     numero_chasis: moto?.numero_chasis ?? '',
+    numero_motor: moto?.numero_motor ?? '',
+    motor_cc: moto?.motor_cc?.toString() ?? '',
     costo: moto?.costo?.toString() ?? '',
     precio_venta: moto?.precio_venta?.toString() ?? '',
     stock: moto?.stock?.toString() ?? '0',
@@ -40,14 +41,14 @@ export function MotoForm({ moto }: Props) {
     setError('')
     const supabase = createClient()
     const data = {
-      codigo: form.codigo,
+      codigo: form.numero_chasis,
       marca: form.marca,
       modelo: form.modelo,
       anio: form.anio ? parseInt(form.anio) : null,
       color: form.color || null,
       motor_cc: form.motor_cc ? parseInt(form.motor_cc) : null,
       numero_motor: form.numero_motor || null,
-      numero_chasis: form.numero_chasis || null,
+      numero_chasis: form.numero_chasis,
       costo: parseFloat(form.costo),
       precio_venta: parseFloat(form.precio_venta),
       stock: parseInt(form.stock),
@@ -66,14 +67,13 @@ export function MotoForm({ moto }: Props) {
   }
 
   const fields = [
-    { label: 'Código interno', field: 'codigo', type: 'text', required: true },
-    { label: 'Marca', field: 'marca', type: 'text', required: true },
     { label: 'Modelo', field: 'modelo', type: 'text', required: true },
-    { label: 'Año', field: 'anio', type: 'number' },
+    { label: 'Marca', field: 'marca', type: 'text', required: true },
     { label: 'Color', field: 'color', type: 'text' },
-    { label: 'Cilindrada (cc)', field: 'motor_cc', type: 'number' },
+    { label: 'Año', field: 'anio', type: 'number' },
+    { label: 'Nº Chasis', field: 'numero_chasis', type: 'text', required: true },
     { label: 'Nº Motor', field: 'numero_motor', type: 'text' },
-    { label: 'Nº Chasis', field: 'numero_chasis', type: 'text' },
+    { label: 'Cilindrada (cc)', field: 'motor_cc', type: 'number' },
     { label: 'Costo (Bs.)', field: 'costo', type: 'number', required: true },
     { label: 'Precio Referencial (Bs.)', field: 'precio_venta', type: 'number', required: true },
     { label: 'Stock actual', field: 'stock', type: 'number', required: true },
@@ -91,6 +91,11 @@ export function MotoForm({ moto }: Props) {
             step={type === 'number' ? '1' : undefined} />
         </div>
       ))}
+      {isEdit ? (
+        <MotoFotos motoId={moto!.id} fotos={fotos} onChange={setFotos} />
+      ) : (
+        <p className="text-xs text-slate-500">Guarda la moto para poder agregar fotos.</p>
+      )}
       {error && <p className="text-sm text-red-500">{error}</p>}
       <div className="flex gap-2">
         <Button type="submit" disabled={loading}>

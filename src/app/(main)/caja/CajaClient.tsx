@@ -11,9 +11,16 @@ import { useMotoCartStore } from '@/lib/store/motoCartStore'
 import { Button } from '@/components/ui/button'
 import { Toaster } from 'sonner'
 
-interface Props { vendedorId: string; vendedorNombre: string; isAdmin: boolean; negocioNombre: string }
+interface Props {
+  vendedorId: string
+  vendedorNombre: string
+  isAdmin: boolean
+  negocioNombre: string
+  negocioDireccion: string
+  negocioTelefono: string
+}
 
-export function CajaClient({ vendedorId, vendedorNombre, isAdmin, negocioNombre }: Props) {
+export function CajaClient({ vendedorId, vendedorNombre, isAdmin, negocioNombre, negocioDireccion, negocioTelefono }: Props) {
   const [mode, setMode] = useState<TipoVenta>('repuesto')
   const [showCheckout, setShowCheckout] = useState(false)
   const repuestoItems = useCartStore(s => s.items)
@@ -55,6 +62,8 @@ export function CajaClient({ vendedorId, vendedorNombre, isAdmin, negocioNombre 
         vendedorNombre={vendedorNombre}
         isAdmin={isAdmin}
         negocioNombre={negocioNombre}
+        negocioDireccion={negocioDireccion}
+        negocioTelefono={negocioTelefono}
       />
     </div>
   )
