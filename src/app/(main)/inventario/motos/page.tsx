@@ -18,6 +18,13 @@ export default async function MotosPage() {
     supabase.from('configuracion').select('nombre_negocio, direccion, telefono').eq('id', 1).single(),
   ])
 
+  const { data: disp } = await supabase
+    .from('motos_disponibilidad')
+    .select('moto_id, reservado, disponible')
+  const disponibilidad = Object.fromEntries(
+    (disp ?? []).map((d) => [d.moto_id, { reservado: d.reservado, disponible: d.disponible }]),
+  )
+
   return (
     <div className="p-4 md:p-6 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -36,6 +43,7 @@ export default async function MotosPage() {
         negocioNombre={config?.nombre_negocio ?? 'Importadora de Motos Fernando'}
         negocioDireccion={config?.direccion ?? ''}
         negocioTelefono={config?.telefono ?? ''}
+        disponibilidad={disponibilidad}
       />
     </div>
   )

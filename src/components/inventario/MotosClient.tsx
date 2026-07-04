@@ -17,9 +17,10 @@ interface Props {
   negocioNombre: string
   negocioDireccion: string
   negocioTelefono: string
+  disponibilidad?: Record<string, { reservado: number; disponible: number }>
 }
 
-export function MotosClient({ motos, isAdmin, vendedorId, vendedorNombre, negocioNombre, negocioDireccion, negocioTelefono }: Props) {
+export function MotosClient({ motos, isAdmin, vendedorId, vendedorNombre, negocioNombre, negocioDireccion, negocioTelefono, disponibilidad }: Props) {
   const [pending, setPending] = useState<Moto | null>(null)
   const [pendingPrecio, setPendingPrecio] = useState('')
   const [checkoutOpen, setCheckoutOpen] = useState(false)
@@ -99,7 +100,7 @@ export function MotosClient({ motos, isAdmin, vendedorId, vendedorNombre, negoci
         </div>
       )}
 
-      <MotoTable motos={motos} isAdmin={isAdmin} onAddToCart={handleAddToCart} />
+      <MotoTable motos={motos} isAdmin={isAdmin} onAddToCart={handleAddToCart} disponibilidad={disponibilidad} />
 
       {itemCount > 0 && (
         <div className="fixed bottom-4 left-4 right-4 md:bottom-6 md:left-[15rem] md:right-6 z-30">

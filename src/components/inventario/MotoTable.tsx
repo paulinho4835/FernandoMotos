@@ -10,9 +10,10 @@ interface Props {
   motos: Moto[]
   isAdmin?: boolean
   onAddToCart?: (m: Moto) => void
+  disponibilidad?: Record<string, { reservado: number; disponible: number }>
 }
 
-export function MotoTable({ motos, isAdmin = false, onAddToCart }: Props) {
+export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad }: Props) {
   return (
     <div className="rounded-md border overflow-x-auto">
       <table className="w-full min-w-[820px] text-sm">
@@ -53,6 +54,11 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart }: Props) {
                 <span className={m.stock <= m.stock_minimo ? 'text-red-600 font-semibold' : ''}>
                   {m.stock}
                 </span>
+                {disponibilidad?.[m.id] && disponibilidad[m.id].reservado > 0 && (
+                  <span className="ml-2 text-xs text-amber-600">
+                    ({disponibilidad[m.id].reservado} reservada{disponibilidad[m.id].reservado !== 1 ? 's' : ''} · {disponibilidad[m.id].disponible} disp.)
+                  </span>
+                )}
                 {m.stock <= m.stock_minimo && (
                   <Badge variant="destructive" className="ml-2 text-xs">Crítico</Badge>
                 )}
