@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Package, Bike,
   History, Users, LogOut, Tag, UserCog, BarChart3, Settings,
-  Menu, X,
+  Menu, X, ClipboardList,
 } from 'lucide-react'
 
 interface Props {
@@ -13,9 +13,10 @@ interface Props {
   rol?: string
   isAdmin: boolean
   signOut: () => Promise<void>
+  pedidosPendientes?: number
 }
 
-export function Sidebar({ nombre, rol, isAdmin, signOut }: Props) {
+export function Sidebar({ nombre, rol, isAdmin, signOut, pedidosPendientes }: Props) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -24,6 +25,7 @@ export function Sidebar({ nombre, rol, isAdmin, signOut }: Props) {
     { href: '/inventario/motos', label: 'Motos', icon: Bike },
     { href: '/historial', label: 'Ventas', icon: History },
     { href: '/clientes', label: 'Clientes', icon: Users },
+    { href: '/pedidos', label: 'Pedidos', icon: ClipboardList },
     ...(isAdmin ? [
       { href: '/categorias', label: 'Categorías', icon: Tag },
       { href: '/vendedores', label: 'Vendedores', icon: UserCog },
@@ -42,7 +44,10 @@ export function Sidebar({ nombre, rol, isAdmin, signOut }: Props) {
         <Link key={item.href} href={item.href}
           className="flex items-center gap-2 px-3 py-2 rounded text-sm hover:bg-slate-700 transition-colors">
           <item.icon size={16} />
-          {item.label}
+          <span className="flex-1">{item.label}</span>
+          {item.href === '/pedidos' && (pedidosPendientes ?? 0) > 0 && (
+            <span className="text-xs bg-green-500 text-white rounded-full px-2 py-0.5">{pedidosPendientes}</span>
+          )}
         </Link>
       ))}
     </nav>

@@ -15,6 +15,11 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
   const isAdmin = perfil?.rol === 'admin'
 
+  const { count: pedidosPendientes } = await supabase
+    .from('pedidos')
+    .select('id', { count: 'exact', head: true })
+    .eq('estado', 'pendiente')
+
   async function signOut() {
     'use server'
     const supabase = await createClient()
@@ -29,6 +34,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
         rol={perfil?.rol}
         isAdmin={isAdmin}
         signOut={signOut}
+        pedidosPendientes={pedidosPendientes ?? 0}
       />
       <main className="flex-1 overflow-auto">{children}</main>
     </div>
