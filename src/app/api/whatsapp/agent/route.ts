@@ -9,8 +9,8 @@ export const runtime = 'nodejs'
 
 export async function POST(request: Request) {
   // Auth: secreto compartido con el whatsapp-service.
-  const secret = process.env.AGENT_WEBHOOK_SECRET ?? ''
-  if (secret && request.headers.get('x-agent-secret') !== secret) {
+  const secret = process.env.AGENT_WEBHOOK_SECRET
+  if (!secret || request.headers.get('x-agent-secret') !== secret) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 
@@ -55,6 +55,14 @@ export async function POST(request: Request) {
     reply = out.content
     history.push({ role: 'assistant', content: reply })
     break
+  }
+
+  // Si el loop se agota sin una respuesta de texto, no dejar al cliente sin
+  // contestación ni la falla invisible: registrar y dar un fallback.
+  if (reply === null) {
+    console.error(`[agent] loop de tool-calling agotado sin respuesta para ${from}`)
+    reply = 'Disculpa, tuve un inconveniente para procesar tu mensaje. Un asesor te escribirá enseguida.'
+    history.push({ role: 'assistant', content: reply })
   }
 
   await guardarConversacion(supabase, from, history)
