@@ -38,7 +38,7 @@ export default async function DashboardPage() {
   const inv = (inventory ?? {}) as Record<string, number>
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-4 md:p-6 space-y-8">
       <h1 className="text-2xl font-bold">Dashboard</h1>
 
       {/* HOY */}
@@ -47,7 +47,7 @@ export default async function DashboardPage() {
         <div className="space-y-4">
           <div>
             <p className="text-xs text-slate-400 uppercase tracking-wide mb-2">Repuestos</p>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <StatCard label="Ventas" value={s.ventas_repuestos_hoy ?? 0} isCurrency highlight="blue" />
               <StatCard label="Ganancia neta" value={s.ganancia_repuestos_hoy ?? 0} isCurrency highlight="green" />
               <StatCard label="Transacciones" value={s.count_repuestos_hoy ?? 0} isCount />
@@ -55,13 +55,13 @@ export default async function DashboardPage() {
           </div>
           <div>
             <p className="text-xs text-slate-400 uppercase tracking-wide mb-2">Motos</p>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <StatCard label="Ventas" value={s.ventas_motos_hoy ?? 0} isCurrency highlight="blue" />
               <StatCard label="Ganancia neta" value={s.ganancia_motos_hoy ?? 0} isCurrency highlight="green" />
               <StatCard label="Motos vendidas" value={s.count_motos_hoy ?? 0} isCount />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <StatCard label="Ventas totales hoy" value={s.total_hoy ?? 0} isCurrency highlight="blue" />
             <StatCard label="Ganancia combinada hoy" value={s.ganancia_total_hoy ?? 0} isCurrency highlight="green" />
           </div>

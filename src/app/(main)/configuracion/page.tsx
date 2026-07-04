@@ -13,7 +13,7 @@ export default async function ConfiguracionPage() {
     .from('configuracion').select('nombre_negocio, direccion, telefono').eq('id', 1).single()
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
       <h1 className="text-2xl font-bold">Configuración</h1>
       <ConfiguracionForm
         nombreInicial={config?.nombre_negocio ?? 'Importadora de Motos Fernando'}

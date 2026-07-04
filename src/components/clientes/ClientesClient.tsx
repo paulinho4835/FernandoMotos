@@ -94,10 +94,10 @@ export function ClientesClient({ clientes }: Props) {
         />
       </div>
 
-      <div className="flex gap-6 items-start">
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
         {/* Tabla de clientes */}
-        <div className="flex-1 rounded-md border overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="w-full lg:flex-1 rounded-md border overflow-x-auto">
+          <table className="w-full min-w-[520px] text-sm">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th className="text-left p-3">Nombre</th>
@@ -138,7 +138,7 @@ export function ClientesClient({ clientes }: Props) {
 
         {/* Panel historial */}
         {selected && (
-          <div className="w-96 shrink-0 border rounded-lg overflow-hidden">
+          <div className="w-full lg:w-96 lg:shrink-0 border rounded-lg overflow-hidden">
             <div className="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
               <div>
                 <p className="font-semibold">{selected.nombre}</p>

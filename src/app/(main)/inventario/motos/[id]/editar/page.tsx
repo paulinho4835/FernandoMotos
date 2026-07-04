@@ -13,7 +13,7 @@ export default async function EditarMotoPage({ params }: { params: Promise<{ id:
   if (!moto) notFound()
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-4 md:p-6 space-y-4">
       <h1 className="text-2xl font-bold">Editar Moto</h1>
       <MotoForm moto={moto} />
     </div>

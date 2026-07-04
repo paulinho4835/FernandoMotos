@@ -14,8 +14,8 @@ interface Props {
 
 export function MotoTable({ motos, isAdmin = false, onAddToCart }: Props) {
   return (
-    <div className="rounded-md border overflow-hidden">
-      <table className="w-full text-sm">
+    <div className="rounded-md border overflow-x-auto">
+      <table className="w-full min-w-[820px] text-sm">
         <thead className="bg-slate-50 text-slate-600">
           <tr>
             <th className="p-3 w-14" />

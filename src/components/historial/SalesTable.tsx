@@ -41,8 +41,8 @@ export function SalesTable({ ventas, title, isAdmin, onDelete, deletingId, onDev
       {title && (
         <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide pt-2">{title}</h3>
       )}
-      <div className="rounded-md border overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="rounded-md border overflow-x-auto">
+        <table className="w-full min-w-[760px] text-sm">
           <thead className="bg-slate-50 text-slate-600">
             <tr>
               <th className="text-left p-3">Fecha</th>

@@ -19,8 +19,8 @@ export default async function InventarioPage() {
   ])
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-6 space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Inventario — Repuestos</h1>
         {isAdmin && (
           <Button asChild>

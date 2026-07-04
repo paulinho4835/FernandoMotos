@@ -29,7 +29,7 @@ export function CajaClient({ vendedorId, vendedorNombre, isAdmin, negocioNombre,
   const hasItems = mode === 'repuesto' ? repuestoItems.length > 0 : motoItems.length > 0
 
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-4">
+    <div className="p-4 md:p-6 max-w-2xl mx-auto space-y-4">
       <Toaster />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Caja</h1>

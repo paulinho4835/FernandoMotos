@@ -102,7 +102,7 @@ export function MotosClient({ motos, isAdmin, vendedorId, vendedorNombre, negoci
       <MotoTable motos={motos} isAdmin={isAdmin} onAddToCart={handleAddToCart} />
 
       {itemCount > 0 && (
-        <div className="fixed bottom-6 left-[15rem] right-6 z-30">
+        <div className="fixed bottom-4 left-4 right-4 md:bottom-6 md:left-[15rem] md:right-6 z-30">
           <div className="bg-slate-900 text-white rounded-xl px-5 py-3 flex items-center justify-between shadow-2xl max-w-3xl mx-auto">
             <div className="flex items-center gap-3">
               <ShoppingCart size={18} />
