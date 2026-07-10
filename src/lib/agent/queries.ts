@@ -1,5 +1,4 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { ChatMessage } from './openrouter'
 
 export type MotoResumen = {
   id: string
@@ -119,45 +118,4 @@ export async function agenteActivo(supabase: SupabaseClient): Promise<boolean> {
     .eq('id', 1)
     .maybeSingle()
   return data?.agente_wa_activo === true
-}
-
-export async function cargarConversacion(
-  supabase: SupabaseClient,
-  telefono: string,
-): Promise<{ historial: ChatMessage[]; estado: 'activa' | 'pausada' }> {
-  const { data } = await supabase
-    .from('conversaciones_wa')
-    .select('historial, estado')
-    .eq('telefono', telefono)
-    .maybeSingle()
-  if (!data) return { historial: [], estado: 'activa' }
-  return { historial: (data.historial ?? []) as ChatMessage[], estado: data.estado }
-}
-
-export async function guardarConversacion(
-  supabase: SupabaseClient,
-  telefono: string,
-  historial: ChatMessage[],
-  clienteNombre?: string | null,
-): Promise<void> {
-  // Recortar a los últimos 20 mensajes para acotar tokens.
-  const recortado = historial.slice(-20)
-  const { error } = await supabase
-    .from('conversaciones_wa')
-    .upsert(
-      {
-        telefono,
-        historial: recortado,
-        ...(clienteNombre ? { cliente_nombre: clienteNombre } : {}),
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'telefono' },
-    )
-  if (error) throw error
-}
-
-export async function pausarConversacion(supabase: SupabaseClient, telefono: string): Promise<void> {
-  await supabase
-    .from('conversaciones_wa')
-    .upsert({ telefono, estado: 'pausada', updated_at: new Date().toISOString() }, { onConflict: 'telefono' })
 }
