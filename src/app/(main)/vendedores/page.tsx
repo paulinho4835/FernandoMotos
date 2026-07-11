@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { VendedoresClient } from '@/components/vendedores/VendedoresClient'
+import { esAdmin } from '@/lib/auth/roles'
 
 export default async function VendedoresPage() {
   const supabase = await createClient()
@@ -8,7 +9,7 @@ export default async function VendedoresPage() {
   const { data: perfil } = await supabase
     .from('perfiles').select('rol').eq('id', user!.id).single()
 
-  if (perfil?.rol !== 'admin') redirect('/dashboard')
+  if (!esAdmin(perfil?.rol)) redirect('/dashboard')
 
   const { data: vendedores } = await supabase
     .from('vendedores')

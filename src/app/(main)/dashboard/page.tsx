@@ -4,13 +4,14 @@ import { StatCard } from '@/components/dashboard/StatCard'
 import { LowStockAlert } from '@/components/dashboard/LowStockAlert'
 import { SalesPeriodStats } from '@/components/dashboard/SalesPeriodStats'
 import { InventoryValue } from '@/components/dashboard/InventoryValue'
+import { esAdmin } from '@/lib/auth/roles'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
   const { data: perfil } = await supabase.from('perfiles').select('rol').eq('id', user.id).single()
-  if (perfil?.rol !== 'admin') redirect('/inventario')
+  if (!esAdmin(perfil?.rol)) redirect('/inventario')
 
   const [
     { data: stats },

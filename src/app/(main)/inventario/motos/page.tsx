@@ -3,6 +3,7 @@ import { MotosClient } from '@/components/inventario/MotosClient'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
+import { esAdmin } from '@/lib/auth/roles'
 
 export default async function MotosPage() {
   const supabase = await createClient()
@@ -11,7 +12,7 @@ export default async function MotosPage() {
     ? await supabase.from('perfiles').select('rol, nombre').eq('id', user.id).single()
     : { data: null }
 
-  const isAdmin = perfil?.rol === 'admin'
+  const isAdmin = esAdmin(perfil?.rol)
 
   const [{ data: motos }, { data: config }] = await Promise.all([
     supabase.from('motos').select('*').eq('activo', true).order('marca'),

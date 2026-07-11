@@ -1,12 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { HistorialClient } from '@/components/historial/HistorialClient'
+import { esAdmin } from '@/lib/auth/roles'
 
 export default async function HistorialPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const { data: perfil } = await supabase
     .from('perfiles').select('rol').eq('id', user!.id).single()
-  const isAdmin = perfil?.rol === 'admin'
+  const isAdmin = esAdmin(perfil?.rol)
 
   const { data: ventas } = await supabase
     .from('ventas')

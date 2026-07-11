@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/layout/Sidebar'
+import { esAdmin, esSuperAdmin } from '@/lib/auth/roles'
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -13,7 +14,15 @@ export default async function MainLayout({ children }: { children: React.ReactNo
     .eq('id', user.id)
     .single()
 
-  const isAdmin = perfil?.rol === 'admin'
+  const isAdmin = esAdmin(perfil?.rol)
+  const isSuperAdmin = esSuperAdmin(perfil?.rol)
+
+  const { data: config } = await supabase
+    .from('configuracion')
+    .select('modulo_compradores_activo')
+    .eq('id', 1)
+    .maybeSingle()
+  const moduloCompradoresActivo = config?.modulo_compradores_activo === true
 
   const { count: pedidosPendientes } = await supabase
     .from('pedidos')
@@ -33,6 +42,8 @@ export default async function MainLayout({ children }: { children: React.ReactNo
         nombre={perfil?.nombre}
         rol={perfil?.rol}
         isAdmin={isAdmin}
+        isSuperAdmin={isSuperAdmin}
+        moduloCompradoresActivo={moduloCompradoresActivo}
         signOut={signOut}
         pedidosPendientes={pedidosPendientes ?? 0}
       />

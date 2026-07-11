@@ -5,18 +5,20 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Package, Bike,
   History, Users, LogOut, Tag, UserCog, BarChart3, Settings,
-  Menu, X, ClipboardList,
+  Menu, X, ClipboardList, ShieldCheck, Contact,
 } from 'lucide-react'
 
 interface Props {
   nombre?: string
   rol?: string
   isAdmin: boolean
+  isSuperAdmin: boolean
+  moduloCompradoresActivo: boolean
   signOut: () => Promise<void>
   pedidosPendientes?: number
 }
 
-export function Sidebar({ nombre, rol, isAdmin, signOut, pedidosPendientes }: Props) {
+export function Sidebar({ nombre, rol, isAdmin, isSuperAdmin, moduloCompradoresActivo, signOut, pedidosPendientes }: Props) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -26,12 +28,18 @@ export function Sidebar({ nombre, rol, isAdmin, signOut, pedidosPendientes }: Pr
     { href: '/historial', label: 'Ventas', icon: History },
     { href: '/clientes', label: 'Clientes', icon: Users },
     { href: '/pedidos', label: 'Pedidos', icon: ClipboardList },
+    ...(isAdmin && moduloCompradoresActivo ? [
+      { href: '/compradores', label: 'Compradores', icon: Contact },
+    ] : []),
     ...(isAdmin ? [
       { href: '/categorias', label: 'Categorías', icon: Tag },
       { href: '/vendedores', label: 'Vendedores', icon: UserCog },
       { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { href: '/reportes', label: 'Reportes', icon: BarChart3 },
       { href: '/configuracion', label: 'Configuración', icon: Settings },
+    ] : []),
+    ...(isSuperAdmin ? [
+      { href: '/super-admin', label: 'Super Admin', icon: ShieldCheck },
     ] : []),
   ]
 

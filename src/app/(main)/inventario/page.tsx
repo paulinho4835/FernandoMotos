@@ -3,6 +3,7 @@ import { InventarioClient } from '@/components/inventario/InventarioClient'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
+import { esAdmin } from '@/lib/auth/roles'
 
 export default async function InventarioPage() {
   const supabase = await createClient()
@@ -10,7 +11,7 @@ export default async function InventarioPage() {
   const { data: perfil } = user
     ? await supabase.from('perfiles').select('rol, nombre').eq('id', user.id).single()
     : { data: null }
-  const isAdmin = perfil?.rol === 'admin'
+  const isAdmin = esAdmin(perfil?.rol)
 
   const [{ data: productos }, { data: categorias }, { data: config }] = await Promise.all([
     supabase.from('productos').select('*').eq('activo', true).order('nombre'),

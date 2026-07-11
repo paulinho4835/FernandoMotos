@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { CajaClient } from './CajaClient'
+import { esAdmin } from '@/lib/auth/roles'
 
 export default async function CajaPage() {
   const supabase = await createClient()
@@ -15,7 +16,7 @@ export default async function CajaPage() {
     <CajaClient
       vendedorId={user.id}
       vendedorNombre={perfil?.nombre ?? 'Vendedor'}
-      isAdmin={perfil?.rol === 'admin'}
+      isAdmin={esAdmin(perfil?.rol)}
       negocioNombre={config?.nombre_negocio ?? 'Importadora de Motos Fernando'}
       negocioDireccion={config?.direccion ?? ''}
       negocioTelefono={config?.telefono ?? ''}

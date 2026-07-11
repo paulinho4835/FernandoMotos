@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { ProductForm } from '@/components/inventario/ProductForm'
+import { esAdmin } from '@/lib/auth/roles'
 
 export default async function EditarProductoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -8,7 +9,7 @@ export default async function EditarProductoPage({ params }: { params: Promise<{
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
   const { data: perfil } = await supabase.from('perfiles').select('rol').eq('id', user.id).single()
-  if (perfil?.rol !== 'admin') redirect('/inventario')
+  if (!esAdmin(perfil?.rol)) redirect('/inventario')
 
   const [{ data: producto }, { data: categorias }] = await Promise.all([
     supabase.from('productos').select('*').eq('id', id).single(),

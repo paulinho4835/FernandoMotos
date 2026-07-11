@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { MotoForm } from '@/components/inventario/MotoForm'
+import { esAdmin } from '@/lib/auth/roles'
 
 export default async function EditarMotoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -8,7 +9,7 @@ export default async function EditarMotoPage({ params }: { params: Promise<{ id:
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
   const { data: perfil } = await supabase.from('perfiles').select('rol').eq('id', user.id).single()
-  if (perfil?.rol !== 'admin') redirect('/inventario/motos')
+  if (!esAdmin(perfil?.rol)) redirect('/inventario/motos')
   const { data: moto } = await supabase.from('motos').select('*').eq('id', id).single()
   if (!moto) notFound()
 
