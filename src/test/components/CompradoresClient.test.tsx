@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { CompradoresClient, type Comprador } from '@/components/compradores/CompradoresClient'
+import { toast } from 'sonner'
 
 const update = vi.fn()
 const eq = vi.fn(() => ({ error: null }))
@@ -16,7 +17,7 @@ const base: Comprador = {
   motos: { marca: 'Honda', modelo: 'XR150', precio_venta: 12500 },
 }
 
-beforeEach(() => { update.mockClear(); eq.mockClear() })
+beforeEach(() => { update.mockClear(); eq.mockClear(); vi.mocked(toast.error).mockClear() })
 
 describe('CompradoresClient', () => {
   it('renderiza el comprador con su saldo (precio - adelanto)', () => {
@@ -43,5 +44,14 @@ describe('CompradoresClient', () => {
     await waitFor(() => expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ adelanto: 3000 }),
     ))
+  })
+
+  it('rechaza un adelanto mayor al precio y no llama al update', () => {
+    render(<CompradoresClient pedidos={[base]} />)
+    fireEvent.click(screen.getByRole('button', { name: /editar adelanto/i }))
+    fireEvent.change(screen.getByLabelText(/nuevo adelanto/i), { target: { value: '15000' } })
+    fireEvent.click(screen.getByRole('button', { name: /guardar/i }))
+    expect(update).not.toHaveBeenCalled()
+    expect(vi.mocked(toast.error)).toHaveBeenCalled()
   })
 })

@@ -42,6 +42,7 @@ export function CompradoresClient({ pedidos }: { pedidos: Comprador[] }) {
   async function guardar(p: Comprador) {
     const monto = Number(editValor)
     if (!Number.isFinite(monto) || monto < 0) { toast.error('Monto inválido'); return }
+    if (monto > precio(p)) { toast.error(`El adelanto no puede superar el precio (${formatBOB(precio(p))})`); return }
     const supabase = createClient()
     const { error } = await supabase
       .from('pedidos')
