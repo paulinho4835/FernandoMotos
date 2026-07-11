@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { type AgentConfig, type AgentTool, createHandoffTool } from '@paulo/agent-core'
-import { buscarMotos, detalleMoto, crearPedido, pedidosPendientesDe } from './queries'
+import { buscarMotos, detalleMoto, crearPedido, pedidosPendientesDe, registrarAdelanto } from './queries'
 
 function buildSystemPrompt(opts: { negocio: string; phoneVerified: boolean }): string {
   return [
@@ -14,9 +14,10 @@ function buildSystemPrompt(opts: { negocio: string; phoneVerified: boolean }): s
     '4. Solo confirma éxito si el resultado de la herramienta lo dice explícitamente (empieza con "OK:"). Si un resultado empieza con "ERROR:", NO inventes confirmación: informa el problema o pide el dato que falta.',
     '5. Aclara siempre que un vendedor humano confirmará el pedido y coordinará el pago y la entrega. Tú no cobras ni reservas la moto físicamente.',
     '6. No prometas financiamiento, envíos ni descuentos que no estén confirmados por un humano.',
+    '7. Para registrar un adelanto/depósito usa registrar_adelanto, SOLO si el cliente menciona un monto. Nunca inventes un adelanto ni asumas que dejó dinero.',
     opts.phoneVerified
       ? ''
-      : '7. No tienes el número de celular del cliente. Pídelo antes de crear un pedido y pásalo como cliente_telefono.',
+      : '8. No tienes el número de celular del cliente. Pídelo antes de crear un pedido y pásalo como cliente_telefono.',
     '',
     'Cuando muestres motos, resume: marca, modelo, año, precio y si hay disponibilidad. No muestres ids internos al cliente.',
   ].filter(Boolean).join('\n')
@@ -78,6 +79,7 @@ export function buildAgentConfig(supabase: SupabaseClient): AgentConfig {
         cliente_nombre: { type: 'string' },
         cliente_telefono: { type: 'string', description: 'Opcional; por defecto el número de WhatsApp del cliente' },
         precio_ofertado: { type: 'number' },
+        adelanto: { type: 'number', description: 'Opcional; adelanto/depósito que el cliente dejará' },
         notas: { type: 'string' },
       },
       required: ['moto_id', 'cliente_nombre'],
@@ -97,9 +99,36 @@ export function buildAgentConfig(supabase: SupabaseClient): AgentConfig {
         cliente_nombre,
         cliente_telefono: telefono,
         precio_ofertado: typeof args.precio_ofertado === 'number' ? args.precio_ofertado : null,
+        adelanto: typeof args.adelanto === 'number' ? args.adelanto : null,
         notas: (args.notas as string | undefined) ?? null,
       })
       return `OK: pedido creado (ref ${id.slice(0, 8)}) para ${cliente_nombre}: ${m.marca} ${m.modelo}. Un vendedor lo confirmará y coordinará el pago y la entrega.`
+    },
+  }
+
+  const registrarAdelantoTool: AgentTool = {
+    name: 'registrar_adelanto',
+    description: 'Registra el adelanto (depósito) sobre el pedido pendiente más reciente del cliente. Úsalo SOLO si el cliente menciona un monto de adelanto.',
+    parameters: {
+      type: 'object',
+      properties: {
+        monto: { type: 'number', description: 'Monto del adelanto en bolivianos' },
+        cliente_telefono: { type: 'string', description: 'Opcional; por defecto el número de WhatsApp del cliente' },
+      },
+      required: ['monto'],
+    },
+    isAction: true,
+    execute: async (args, ctx) => {
+      const monto = typeof args.monto === 'number' ? args.monto : NaN
+      if (!Number.isFinite(monto) || monto <= 0) {
+        return 'ERROR: el adelanto NO se registró. Falta un monto válido. Pregunta cuánto dejará de adelanto y vuelve a llamar registrar_adelanto.'
+      }
+      const telefono = ((args.cliente_telefono as string | undefined)?.replace(/[\s.\-]/g, '') || ctx.telefono)
+      const { ok, moto } = await registrarAdelanto(supabase, { telefono, monto })
+      if (!ok) {
+        return 'ERROR: el adelanto NO se registró porque no encontré un pedido pendiente de este cliente. Crea primero el pedido con crear_pedido y luego registra el adelanto.'
+      }
+      return `OK: adelanto de ${monto} Bs registrado${moto ? ` para ${moto}` : ''}. Un vendedor confirmará el pedido y coordinará el saldo.`
     },
   }
 
@@ -118,6 +147,6 @@ export function buildAgentConfig(supabase: SupabaseClient): AgentConfig {
     negocio: 'Importadora de Motos Fernando',
     buildSystemPrompt: ({ negocio, meta }) =>
       buildSystemPrompt({ negocio, phoneVerified: meta.phoneVerified !== 'false' }),
-    tools: [buscarMotosTool, detalleMotoTool, crearPedidoTool, estadoPedidoTool, createHandoffTool()],
+    tools: [buscarMotosTool, detalleMotoTool, crearPedidoTool, registrarAdelantoTool, estadoPedidoTool, createHandoffTool()],
   }
 }

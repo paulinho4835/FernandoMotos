@@ -78,7 +78,7 @@ export async function detalleMoto(supabase: SupabaseClient, motoId: string) {
 
 export async function crearPedido(
   supabase: SupabaseClient,
-  d: { moto_id: string; cliente_nombre: string; cliente_telefono: string; precio_ofertado?: number | null; notas?: string | null },
+  d: { moto_id: string; cliente_nombre: string; cliente_telefono: string; precio_ofertado?: number | null; adelanto?: number | null; notas?: string | null },
 ): Promise<{ id: string }> {
   const { data, error } = await supabase
     .from('pedidos')
@@ -87,6 +87,7 @@ export async function crearPedido(
       cliente_nombre: d.cliente_nombre,
       cliente_telefono: d.cliente_telefono,
       precio_ofertado: d.precio_ofertado ?? null,
+      adelanto: d.adelanto ?? 0,
       notas: d.notas ?? null,
       estado: 'pendiente',
       origen: 'whatsapp',
@@ -95,6 +96,30 @@ export async function crearPedido(
     .single()
   if (error) throw error
   return { id: data.id }
+}
+
+export async function registrarAdelanto(
+  supabase: SupabaseClient,
+  d: { telefono: string; monto: number },
+): Promise<{ ok: boolean; moto?: string }> {
+  const telefono = d.telefono.replace(/[\s.\-]/g, '')
+  const { data, error } = await supabase
+    .from('pedidos')
+    .select('id, motos(marca, modelo)')
+    .eq('cliente_telefono', telefono)
+    .eq('estado', 'pendiente')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (error) throw error
+  if (!data) return { ok: false }
+  const { error: upErr } = await supabase
+    .from('pedidos')
+    .update({ adelanto: d.monto, updated_at: new Date().toISOString() })
+    .eq('id', data.id)
+  if (upErr) throw upErr
+  const moto = data.motos as unknown as { marca: string; modelo: string } | null
+  return { ok: true, moto: moto ? `${moto.marca} ${moto.modelo}` : undefined }
 }
 
 export async function pedidosPendientesDe(supabase: SupabaseClient, telefono: string) {

@@ -45,6 +45,38 @@ describe('crear_pedido', () => {
     expect(r).toMatch(/^ERROR:/)
     expect(queries.crearPedido).not.toHaveBeenCalled()
   })
+
+  it('pasa el adelanto a crearPedido cuando viene en args', async () => {
+    vi.mocked(queries.detalleMoto).mockResolvedValue({ id: 'm1', disponible: 2 } as never)
+    vi.mocked(queries.crearPedido).mockResolvedValue({ id: 'ped1' })
+    await getTool('crear_pedido').execute({ moto_id: 'm1', cliente_nombre: 'Juan', adelanto: 500 }, ctx())
+    expect(queries.crearPedido).toHaveBeenCalledWith(
+      supa,
+      expect.objectContaining({ adelanto: 500 }),
+    )
+  })
+})
+
+describe('registrar_adelanto', () => {
+  it('ERROR si el monto no es válido', async () => {
+    const r = await getTool('registrar_adelanto').execute({ monto: 0 }, ctx())
+    expect(r).toMatch(/^ERROR:/)
+    expect(queries.registrarAdelanto).not.toHaveBeenCalled()
+  })
+
+  it('ERROR si no hay pedido pendiente', async () => {
+    vi.mocked(queries.registrarAdelanto).mockResolvedValue({ ok: false })
+    const r = await getTool('registrar_adelanto').execute({ monto: 500 }, ctx('591700'))
+    expect(queries.registrarAdelanto).toHaveBeenCalledWith(supa, { telefono: '591700', monto: 500 })
+    expect(r).toMatch(/^ERROR:/)
+  })
+
+  it('OK cuando registra el adelanto', async () => {
+    vi.mocked(queries.registrarAdelanto).mockResolvedValue({ ok: true, moto: 'Honda XR150' })
+    const r = await getTool('registrar_adelanto').execute({ monto: 500 }, ctx('591700'))
+    expect(r).toMatch(/^OK:/)
+    expect(r).toContain('500')
+  })
 })
 
 describe('buscar_motos', () => {
