@@ -11,7 +11,7 @@ export default async function SuperAdminPage() {
   if (!esSuperAdmin(perfil?.rol)) redirect('/inventario')
 
   const { data: config } = await supabase
-    .from('configuracion').select('modulo_compradores_activo').eq('id', 1).single()
+    .from('configuracion').select('modulo_compradores_activo').eq('id', 1).maybeSingle()
 
   return (
     <div className="p-4 md:p-6 space-y-6">

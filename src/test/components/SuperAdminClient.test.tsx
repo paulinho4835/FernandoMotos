@@ -3,7 +3,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { SuperAdminClient } from '@/components/super-admin/SuperAdminClient'
 
 const update = vi.fn()
-const eq = vi.fn(() => ({ error: null }))
+const select = vi.fn(() => ({ data: [{ id: 1 }], error: null }))
+const eq = vi.fn(() => ({ select }))
 vi.mock('@/lib/supabase/client', () => ({
   createClient: () => ({
     from: () => ({ update: (v: unknown) => { update(v); return { eq } } }),
@@ -11,7 +12,7 @@ vi.mock('@/lib/supabase/client', () => ({
 }))
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
-beforeEach(() => { update.mockClear(); eq.mockClear() })
+beforeEach(() => { update.mockClear(); eq.mockClear(); select.mockClear() })
 
 describe('SuperAdminClient', () => {
   it('muestra el estado inicial del toggle', () => {

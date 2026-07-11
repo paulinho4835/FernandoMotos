@@ -11,11 +11,13 @@ export function SuperAdminClient({ moduloInicial }: { moduloInicial: boolean }) 
   async function toggle() {
     setSaving(true)
     const supabase = createClient()
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('configuracion')
       .update({ modulo_compradores_activo: !activo, updated_at: new Date().toISOString() })
       .eq('id', 1)
+      .select('id')
     if (error) toast.error(error.message)
+    else if (!data || data.length === 0) toast.error('No se pudo guardar: sin permiso para modificar la configuración.')
     else { setActivo(!activo); toast.success(!activo ? 'Módulo activado' : 'Módulo desactivado') }
     setSaving(false)
   }
