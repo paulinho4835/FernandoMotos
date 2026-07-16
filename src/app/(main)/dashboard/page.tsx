@@ -18,7 +18,6 @@ export default async function DashboardPage() {
     { data: summary },
     { data: inventory },
     { data: allProductos },
-    { data: allMotos },
   ] = await Promise.all([
     supabase.rpc('get_dashboard_stats'),
     supabase.rpc('get_sales_summary'),
@@ -26,13 +25,9 @@ export default async function DashboardPage() {
     supabase.from('productos')
       .select('id, nombre, codigo, stock, stock_minimo')
       .eq('activo', true),
-    supabase.from('motos')
-      .select('id, marca, modelo, stock, stock_minimo')
-      .eq('activo', true),
   ])
 
   const lowProductos = allProductos?.filter(p => p.stock <= p.stock_minimo) ?? []
-  const lowMotos = allMotos?.filter(m => m.stock <= m.stock_minimo) ?? []
 
   const s = (stats    ?? {}) as Record<string, number>
   const sm = (summary  ?? {}) as Record<string, number>
@@ -95,9 +90,9 @@ export default async function DashboardPage() {
       {/* ALERTAS DE STOCK */}
       <section>
         <h2 className="text-lg font-semibold mb-3 text-red-600">
-          Alertas de Stock ({(lowProductos?.length ?? 0) + (lowMotos?.length ?? 0)})
+          Alertas de Stock ({lowProductos.length})
         </h2>
-        <LowStockAlert productos={lowProductos ?? []} motos={lowMotos ?? []} />
+        <LowStockAlert productos={lowProductos} />
       </section>
     </div>
   )
