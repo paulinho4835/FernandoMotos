@@ -20,14 +20,14 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad 
         <thead className="bg-slate-50 text-slate-600">
           <tr>
             <th className="p-3 w-14" />
-            <th className="text-left p-3">Modelo</th>
+            <th className="text-left p-3">Tipo/CC</th>
             <th className="text-left p-3">Marca</th>
             <th className="text-left p-3">Color</th>
             <th className="text-left p-3">Año</th>
             <th className="text-left p-3">Chasis</th>
             <th className="text-left p-3">Motor</th>
-            <th className="text-left p-3">Stock</th>
-            <th className="text-left p-3">Precio Referencial</th>
+            <th className="text-left p-3">Ubicación</th>
+            <th className="text-left p-3">Precio de Venta</th>
             <th className="p-3" />
           </tr>
         </thead>
@@ -44,25 +44,18 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad 
                   </div>
                 )}
               </td>
-              <td className="p-3">{m.modelo}</td>
+              <td className="p-3">
+                {m.modelo}
+                {disponibilidad?.[m.id] && disponibilidad[m.id].reservado > 0 && (
+                  <Badge variant="secondary" className="ml-2 text-xs">Reservada</Badge>
+                )}
+              </td>
               <td className="p-3">{m.marca}</td>
               <td className="p-3">{m.color ?? '—'}</td>
               <td className="p-3">{m.anio ?? '—'}</td>
               <td className="p-3 font-mono text-xs">{m.numero_chasis ?? '—'}</td>
               <td className="p-3 font-mono text-xs">{m.numero_motor ?? '—'}</td>
-              <td className="p-3">
-                <span className={m.stock <= m.stock_minimo ? 'text-red-600 font-semibold' : ''}>
-                  {m.stock}
-                </span>
-                {disponibilidad?.[m.id] && disponibilidad[m.id].reservado > 0 && (
-                  <span className="ml-2 text-xs text-amber-600">
-                    ({disponibilidad[m.id].reservado} reservada{disponibilidad[m.id].reservado !== 1 ? 's' : ''} · {disponibilidad[m.id].disponible} disp.)
-                  </span>
-                )}
-                {m.stock <= m.stock_minimo && (
-                  <Badge variant="destructive" className="ml-2 text-xs">Crítico</Badge>
-                )}
-              </td>
+              <td className="p-3">{m.ubicacion ?? '—'}</td>
               <td className="p-3">{formatBOB(m.precio_venta)}</td>
               <td className="p-3">
                 <div className="flex items-center gap-1">
