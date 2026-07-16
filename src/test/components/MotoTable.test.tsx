@@ -96,9 +96,19 @@ describe('MotoTable', () => {
     fireEvent.click(screen.getByTitle('Eliminar moto'))
 
     await waitFor(() => expect(alertSpy).toHaveBeenCalledWith(
-      'No se puede eliminar: esta moto ya tiene una venta registrada en el historial.',
+      'No se puede eliminar: esta moto tiene una venta o un pedido registrado que la referencia.',
     ))
     expect(refresh).not.toHaveBeenCalled()
+  })
+
+  it('muestra chasis s/n en el confirm cuando numero_chasis es null', () => {
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const motoSinChasis = { ...moto, numero_chasis: null } as unknown as Moto
+    render(<MotoTable motos={[motoSinChasis]} isAdmin />)
+
+    fireEvent.click(screen.getByTitle('Eliminar moto'))
+
+    expect(confirmSpy).toHaveBeenCalledWith(expect.stringContaining('chasis: s/n'))
   })
 
   it('muestra el mensaje de error de Supabase para otros errores', async () => {

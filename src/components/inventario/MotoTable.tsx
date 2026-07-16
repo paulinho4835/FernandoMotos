@@ -25,7 +25,7 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad,
     const { error } = await supabase.from('motos').delete().eq('id', m.id)
     if (error) {
       if (error.code === '23503') {
-        alert('No se puede eliminar: esta moto ya tiene una venta registrada en el historial.')
+        alert('No se puede eliminar: esta moto tiene una venta o un pedido registrado que la referencia.')
       } else {
         alert(`No se pudo eliminar: ${error.message}`)
       }
