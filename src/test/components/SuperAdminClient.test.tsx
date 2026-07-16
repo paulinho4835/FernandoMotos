@@ -17,8 +17,8 @@ beforeEach(() => {
   update.mockClear()
   eq.mockClear()
   select.mockClear()
-  ;(toast.success as any).mockClear()
-  ;(toast.error as any).mockClear()
+  vi.mocked(toast.success).mockClear()
+  vi.mocked(toast.error).mockClear()
 })
 
 describe('SuperAdminClient', () => {
