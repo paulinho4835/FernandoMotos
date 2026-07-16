@@ -22,7 +22,6 @@ const motoItem: CartItemMoto = {
   modelo: 'CB150',
   anio: 2023,
   precio_unitario: 8500,
-  costo_unitario: 7000,
   cantidad: 1,
   stock: 3,
 }

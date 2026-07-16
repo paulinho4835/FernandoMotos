@@ -1,32 +1,54 @@
 'use client'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import type { Moto } from '@/lib/types'
 import { formatBOB } from '@/lib/utils/formatCurrency'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Edit, ShoppingCart, Bike } from 'lucide-react'
+import { Edit, ShoppingCart, Bike, Trash2 } from 'lucide-react'
 
 interface Props {
   motos: Moto[]
   isAdmin?: boolean
   onAddToCart?: (m: Moto) => void
+  disponibilidad?: Record<string, { reservado: number; disponible: number }>
+  costos?: Record<string, number>
 }
 
-export function MotoTable({ motos, isAdmin = false, onAddToCart }: Props) {
+export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad, costos }: Props) {
+  const router = useRouter()
+
+  async function handleDelete(m: Moto) {
+    if (!confirm(`¿Eliminar "${m.marca} ${m.modelo}" (chasis: ${m.numero_chasis ?? 's/n'})? Esta acción no se puede deshacer.`)) return
+    const supabase = createClient()
+    const { error } = await supabase.from('motos').delete().eq('id', m.id)
+    if (error) {
+      if (error.code === '23503') {
+        alert('No se puede eliminar: esta moto tiene una venta o un pedido registrado que la referencia.')
+      } else {
+        alert(`No se pudo eliminar: ${error.message}`)
+      }
+      return
+    }
+    router.refresh()
+  }
+
   return (
     <div className="rounded-md border overflow-x-auto">
       <table className="w-full min-w-[820px] text-sm">
         <thead className="bg-slate-50 text-slate-600">
           <tr>
             <th className="p-3 w-14" />
-            <th className="text-left p-3">Modelo</th>
+            <th className="text-left p-3">Tipo/CC</th>
             <th className="text-left p-3">Marca</th>
             <th className="text-left p-3">Color</th>
             <th className="text-left p-3">Año</th>
             <th className="text-left p-3">Chasis</th>
             <th className="text-left p-3">Motor</th>
-            <th className="text-left p-3">Stock</th>
-            <th className="text-left p-3">Precio Referencial</th>
+            <th className="text-left p-3">Ubicación</th>
+            {isAdmin && <th className="text-left p-3">Precio de Compra</th>}
+            <th className="text-left p-3">Precio de Venta</th>
             <th className="p-3" />
           </tr>
         </thead>
@@ -43,20 +65,21 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart }: Props) {
                   </div>
                 )}
               </td>
-              <td className="p-3">{m.modelo}</td>
+              <td className="p-3">
+                {m.modelo}
+                {disponibilidad?.[m.id] && disponibilidad[m.id].reservado > 0 && (
+                  <Badge variant="secondary" className="ml-2 text-xs">Reservada</Badge>
+                )}
+              </td>
               <td className="p-3">{m.marca}</td>
               <td className="p-3">{m.color ?? '—'}</td>
               <td className="p-3">{m.anio ?? '—'}</td>
               <td className="p-3 font-mono text-xs">{m.numero_chasis ?? '—'}</td>
               <td className="p-3 font-mono text-xs">{m.numero_motor ?? '—'}</td>
-              <td className="p-3">
-                <span className={m.stock <= m.stock_minimo ? 'text-red-600 font-semibold' : ''}>
-                  {m.stock}
-                </span>
-                {m.stock <= m.stock_minimo && (
-                  <Badge variant="destructive" className="ml-2 text-xs">Crítico</Badge>
-                )}
-              </td>
+              <td className="p-3">{m.ubicacion ?? '—'}</td>
+              {isAdmin && (
+                <td className="p-3 text-amber-700 font-medium">{formatBOB(costos?.[m.id] ?? 0)}</td>
+              )}
               <td className="p-3">{formatBOB(m.precio_venta)}</td>
               <td className="p-3">
                 <div className="flex items-center gap-1">
@@ -70,12 +93,17 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart }: Props) {
                       <Link href={`/inventario/motos/${m.id}/editar`}><Edit size={14} /></Link>
                     </Button>
                   )}
+                  {isAdmin && (
+                    <Button size="sm" variant="ghost" title="Eliminar moto" onClick={() => handleDelete(m)}>
+                      <Trash2 size={14} className="text-red-500" />
+                    </Button>
+                  )}
                 </div>
               </td>
             </tr>
           ))}
           {motos.length === 0 && (
-            <tr><td colSpan={10} className="p-6 text-center text-slate-400">Sin motos</td></tr>
+            <tr><td colSpan={isAdmin ? 11 : 10} className="p-6 text-center text-slate-400">Sin motos</td></tr>
           )}
         </tbody>
       </table>

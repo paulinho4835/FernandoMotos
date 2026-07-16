@@ -41,7 +41,6 @@ export function MotoSearch() {
       modelo: m.modelo,
       anio: m.anio,
       precio_unitario: m.precio_venta,
-      costo_unitario: m.costo,
       stock: m.stock,
     })
     setQuery('')

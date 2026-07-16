@@ -65,11 +65,11 @@ export interface Moto {
   motor_cc: number | null
   numero_motor: string | null
   numero_chasis: string | null
-  costo: number
   precio_venta: number
   stock: number
   stock_minimo: number
   descripcion: string | null
+  ubicacion?: string | null
   fotos: string[]
   activo: boolean
   created_at: string
@@ -139,7 +139,6 @@ export interface CartItemMoto {
   modelo: string
   anio: number | null
   precio_unitario: number
-  costo_unitario: number
   cantidad: number
   stock: number
 }

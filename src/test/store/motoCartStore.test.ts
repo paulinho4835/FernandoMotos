@@ -9,7 +9,6 @@ const baseMoto: Omit<CartItemMoto, 'cantidad'> = {
   modelo: 'CB150',
   anio: 2023,
   precio_unitario: 8500,
-  costo_unitario: 7000,
   stock: 3,
 }
 
@@ -45,7 +44,6 @@ describe('motoCartStore — addItem', () => {
     expect(item.modelo).toBe('CB150')
     expect(item.anio).toBe(2023)
     expect(item.precio_unitario).toBe(8500)
-    expect(item.costo_unitario).toBe(7000)
   })
 
   it('acepta anio null', () => {
@@ -103,27 +101,5 @@ describe('motoCartStore — total', () => {
     useMotoCartStore.getState().addItem(baseMoto)
     useMotoCartStore.getState().addItem({ ...baseMoto, moto_id: 'moto-2', precio_unitario: 12000 })
     expect(useMotoCartStore.getState().total()).toBe(8500 + 12000)
-  })
-})
-
-describe('motoCartStore — ganancia', () => {
-  it('retorna 0 con carrito vacío', () => {
-    expect(useMotoCartStore.getState().ganancia()).toBe(0)
-  })
-
-  it('calcula ganancia = precio - costo', () => {
-    useMotoCartStore.getState().addItem(baseMoto) // 8500 - 7000 = 1500
-    expect(useMotoCartStore.getState().ganancia()).toBe(1500)
-  })
-
-  it('suma ganancias de múltiples motos', () => {
-    useMotoCartStore.getState().addItem(baseMoto) // 1500
-    useMotoCartStore.getState().addItem({ ...baseMoto, moto_id: 'moto-2', precio_unitario: 10000, costo_unitario: 8000 }) // 2000
-    expect(useMotoCartStore.getState().ganancia()).toBe(3500)
-  })
-
-  it('ganancia cero si precio igual a costo', () => {
-    useMotoCartStore.getState().addItem({ ...baseMoto, precio_unitario: 7000, costo_unitario: 7000 })
-    expect(useMotoCartStore.getState().ganancia()).toBe(0)
   })
 })

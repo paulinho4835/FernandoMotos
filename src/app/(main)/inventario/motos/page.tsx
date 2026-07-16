@@ -3,6 +3,7 @@ import { MotosClient } from '@/components/inventario/MotosClient'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
+import { esAdmin } from '@/lib/auth/roles'
 
 export default async function MotosPage() {
   const supabase = await createClient()
@@ -11,12 +12,27 @@ export default async function MotosPage() {
     ? await supabase.from('perfiles').select('rol, nombre').eq('id', user.id).single()
     : { data: null }
 
-  const isAdmin = perfil?.rol === 'admin'
+  const isAdmin = esAdmin(perfil?.rol)
 
   const [{ data: motos }, { data: config }] = await Promise.all([
-    supabase.from('motos').select('*').eq('activo', true).order('marca'),
+    supabase.from('motos').select('*').eq('activo', true).gt('stock', 0).order('marca'),
     supabase.from('configuracion').select('nombre_negocio, direccion, telefono').eq('id', 1).single(),
   ])
+
+  const { data: disp } = await supabase
+    .from('motos_disponibilidad')
+    .select('moto_id, reservado, disponible')
+  const disponibilidad = Object.fromEntries(
+    (disp ?? []).map((d) => [d.moto_id, { reservado: d.reservado, disponible: d.disponible }]),
+  )
+
+  let costos: Record<string, number> | undefined
+  if (isAdmin) {
+    const { data: costosData } = await supabase
+      .from('motos_costos')
+      .select('moto_id, costo')
+    costos = Object.fromEntries((costosData ?? []).map((c) => [c.moto_id, c.costo]))
+  }
 
   return (
     <div className="p-4 md:p-6 space-y-4">
@@ -36,6 +52,8 @@ export default async function MotosPage() {
         negocioNombre={config?.nombre_negocio ?? 'Importadora de Motos Fernando'}
         negocioDireccion={config?.direccion ?? ''}
         negocioTelefono={config?.telefono ?? ''}
+        disponibilidad={disponibilidad}
+        costos={costos}
       />
     </div>
   )
