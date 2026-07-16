@@ -28,4 +28,16 @@ describe('MotoTable', () => {
     render(<MotoTable motos={[moto]} disponibilidad={{ m1: { reservado: 1, disponible: 0 } }} />)
     expect(screen.getByText(/reservada/i)).toBeInTheDocument()
   })
+
+  it('muestra Precio de Compra cuando isAdmin=true y hay costos', () => {
+    render(<MotoTable motos={[moto]} isAdmin costos={{ m1: 8000 }} />)
+    expect(screen.getByText('Precio de Compra')).toBeInTheDocument()
+    expect(screen.getByText('Bs. 8.000,00')).toBeInTheDocument()
+  })
+
+  it('no muestra Precio de Compra cuando isAdmin=false', () => {
+    render(<MotoTable motos={[moto]} costos={{ m1: 8000 }} />)
+    expect(screen.queryByText('Precio de Compra')).not.toBeInTheDocument()
+    expect(screen.queryByText('Bs. 8.000,00')).not.toBeInTheDocument()
+  })
 })

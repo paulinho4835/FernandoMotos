@@ -11,9 +11,10 @@ interface Props {
   isAdmin?: boolean
   onAddToCart?: (m: Moto) => void
   disponibilidad?: Record<string, { reservado: number; disponible: number }>
+  costos?: Record<string, number>
 }
 
-export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad }: Props) {
+export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad, costos }: Props) {
   return (
     <div className="rounded-md border overflow-x-auto">
       <table className="w-full min-w-[820px] text-sm">
@@ -27,6 +28,7 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad 
             <th className="text-left p-3">Chasis</th>
             <th className="text-left p-3">Motor</th>
             <th className="text-left p-3">Ubicación</th>
+            {isAdmin && <th className="text-left p-3">Precio de Compra</th>}
             <th className="text-left p-3">Precio de Venta</th>
             <th className="p-3" />
           </tr>
@@ -56,6 +58,9 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad 
               <td className="p-3 font-mono text-xs">{m.numero_chasis ?? '—'}</td>
               <td className="p-3 font-mono text-xs">{m.numero_motor ?? '—'}</td>
               <td className="p-3">{m.ubicacion ?? '—'}</td>
+              {isAdmin && (
+                <td className="p-3 text-amber-700 font-medium">{formatBOB(costos?.[m.id] ?? 0)}</td>
+              )}
               <td className="p-3">{formatBOB(m.precio_venta)}</td>
               <td className="p-3">
                 <div className="flex items-center gap-1">
@@ -74,7 +79,7 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad 
             </tr>
           ))}
           {motos.length === 0 && (
-            <tr><td colSpan={10} className="p-6 text-center text-slate-400">Sin motos</td></tr>
+            <tr><td colSpan={isAdmin ? 11 : 10} className="p-6 text-center text-slate-400">Sin motos</td></tr>
           )}
         </tbody>
       </table>
