@@ -1,10 +1,12 @@
 'use client'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import type { Moto } from '@/lib/types'
 import { formatBOB } from '@/lib/utils/formatCurrency'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Edit, ShoppingCart, Bike } from 'lucide-react'
+import { Edit, ShoppingCart, Bike, Trash2 } from 'lucide-react'
 
 interface Props {
   motos: Moto[]
@@ -15,6 +17,23 @@ interface Props {
 }
 
 export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad, costos }: Props) {
+  const router = useRouter()
+
+  async function handleDelete(m: Moto) {
+    if (!confirm(`¿Eliminar "${m.marca} ${m.modelo}" (chasis: ${m.numero_chasis ?? 's/n'})? Esta acción no se puede deshacer.`)) return
+    const supabase = createClient()
+    const { error } = await supabase.from('motos').delete().eq('id', m.id)
+    if (error) {
+      if (error.code === '23503') {
+        alert('No se puede eliminar: esta moto ya tiene una venta registrada en el historial.')
+      } else {
+        alert(`No se pudo eliminar: ${error.message}`)
+      }
+      return
+    }
+    router.refresh()
+  }
+
   return (
     <div className="rounded-md border overflow-x-auto">
       <table className="w-full min-w-[820px] text-sm">
@@ -72,6 +91,11 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad,
                   {isAdmin && (
                     <Button asChild size="sm" variant="ghost">
                       <Link href={`/inventario/motos/${m.id}/editar`}><Edit size={14} /></Link>
+                    </Button>
+                  )}
+                  {isAdmin && (
+                    <Button size="sm" variant="ghost" title="Eliminar moto" onClick={() => handleDelete(m)}>
+                      <Trash2 size={14} className="text-red-500" />
                     </Button>
                   )}
                 </div>

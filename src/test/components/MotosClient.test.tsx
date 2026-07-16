@@ -4,6 +4,7 @@ import { MotosClient } from '@/components/inventario/MotosClient'
 import type { Moto } from '@/lib/types'
 
 vi.mock('next/link', () => ({ default: ({ children }: { children: React.ReactNode }) => <a>{children}</a> }))
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }))
 vi.mock('@/lib/supabase/client', () => ({ createClient: () => ({}) }))
 vi.mock('@/components/pos/CheckoutModal', () => ({ CheckoutModal: () => null }))
 
