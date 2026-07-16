@@ -18,9 +18,10 @@ interface Props {
   negocioDireccion: string
   negocioTelefono: string
   disponibilidad?: Record<string, { reservado: number; disponible: number }>
+  costos?: Record<string, number>
 }
 
-export function MotosClient({ motos, isAdmin, vendedorId, vendedorNombre, negocioNombre, negocioDireccion, negocioTelefono, disponibilidad }: Props) {
+export function MotosClient({ motos, isAdmin, vendedorId, vendedorNombre, negocioNombre, negocioDireccion, negocioTelefono, disponibilidad, costos }: Props) {
   const [pending, setPending] = useState<Moto | null>(null)
   const [pendingPrecio, setPendingPrecio] = useState('')
   const [checkoutOpen, setCheckoutOpen] = useState(false)
@@ -112,7 +113,7 @@ export function MotosClient({ motos, isAdmin, vendedorId, vendedorNombre, negoci
         className="max-w-xs"
       />
 
-      <MotoTable motos={visibles} isAdmin={isAdmin} onAddToCart={handleAddToCart} disponibilidad={disponibilidad} />
+      <MotoTable motos={visibles} isAdmin={isAdmin} onAddToCart={handleAddToCart} disponibilidad={disponibilidad} costos={costos} />
 
       {itemCount > 0 && (
         <div className="fixed bottom-4 left-4 right-4 md:bottom-6 md:left-[15rem] md:right-6 z-30">

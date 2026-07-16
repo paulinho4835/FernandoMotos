@@ -26,6 +26,14 @@ export default async function MotosPage() {
     (disp ?? []).map((d) => [d.moto_id, { reservado: d.reservado, disponible: d.disponible }]),
   )
 
+  let costos: Record<string, number> | undefined
+  if (isAdmin) {
+    const { data: costosData } = await supabase
+      .from('motos_costos')
+      .select('moto_id, costo')
+    costos = Object.fromEntries((costosData ?? []).map((c) => [c.moto_id, c.costo]))
+  }
+
   return (
     <div className="p-4 md:p-6 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -45,6 +53,7 @@ export default async function MotosPage() {
         negocioDireccion={config?.direccion ?? ''}
         negocioTelefono={config?.telefono ?? ''}
         disponibilidad={disponibilidad}
+        costos={costos}
       />
     </div>
   )
