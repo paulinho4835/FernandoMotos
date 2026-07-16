@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import type { Moto } from '@/lib/types'
 import { useMotoCartStore } from '@/lib/store/motoCartStore'
 import { MotoTable } from './MotoTable'
@@ -24,6 +24,12 @@ export function MotosClient({ motos, isAdmin, vendedorId, vendedorNombre, negoci
   const [pending, setPending] = useState<Moto | null>(null)
   const [pendingPrecio, setPendingPrecio] = useState('')
   const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [search, setSearch] = useState('')
+
+  const visibles = useMemo(
+    () => motos.filter(m => !search.trim() || m.modelo.toLowerCase().includes(search.trim().toLowerCase())),
+    [motos, search],
+  )
 
   const cartItems = useMotoCartStore(s => s.items)
   const cartTotal = useMotoCartStore(s => s.total)
@@ -99,7 +105,14 @@ export function MotosClient({ motos, isAdmin, vendedorId, vendedorNombre, negoci
         </div>
       )}
 
-      <MotoTable motos={motos} isAdmin={isAdmin} onAddToCart={handleAddToCart} disponibilidad={disponibilidad} />
+      <Input
+        placeholder="Buscar por Tipo/CC..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        className="max-w-xs"
+      />
+
+      <MotoTable motos={visibles} isAdmin={isAdmin} onAddToCart={handleAddToCart} disponibilidad={disponibilidad} />
 
       {itemCount > 0 && (
         <div className="fixed bottom-4 left-4 right-4 md:bottom-6 md:left-[15rem] md:right-6 z-30">
