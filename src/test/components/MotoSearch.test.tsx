@@ -14,7 +14,6 @@ const mockMoto: Moto = {
   motor_cc: 150,
   numero_motor: 'ENG001',
   numero_chasis: 'CHS001',
-  costo: 7000,
   precio_venta: 8500,
   stock: 3,
   stock_minimo: 1,
@@ -112,7 +111,6 @@ describe('MotoSearch — selección de moto', () => {
     expect(items[0].moto_id).toBe('m1')
     expect(items[0].marca).toBe('Honda')
     expect(items[0].precio_unitario).toBe(8500)
-    expect(items[0].costo_unitario).toBe(7000)
   })
 
   it('limpia el input después de seleccionar', async () => {
@@ -134,12 +132,11 @@ describe('MotoSearch — selección de moto', () => {
     expect(useMotoCartStore.getState().items).toHaveLength(1)
   })
 
-  it('asigna precio_venta como precio_unitario y costo como costo_unitario', async () => {
+  it('asigna precio_venta como precio_unitario', async () => {
     render(<MotoSearch />)
     await buscarMoto()
     fireEvent.click(screen.getByText(/Honda CB150 2023/).closest('button')!)
     const item = useMotoCartStore.getState().items[0]
     expect(item.precio_unitario).toBe(mockMoto.precio_venta)
-    expect(item.costo_unitario).toBe(mockMoto.costo)
   })
 })

@@ -46,7 +46,6 @@ export function MotosClient({ motos, isAdmin, vendedorId, vendedorNombre, negoci
       modelo: pending.modelo,
       anio: pending.anio,
       precio_unitario: precio,
-      costo_unitario: pending.costo,
       stock: pending.stock,
     })
     setPending(null)

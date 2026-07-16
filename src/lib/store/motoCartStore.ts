@@ -7,7 +7,6 @@ interface MotoCartStore {
   removeItem: (moto_id: string) => void
   clear: () => void
   total: () => number
-  ganancia: () => number
 }
 
 export const useMotoCartStore = create<MotoCartStore>((set, get) => ({
@@ -22,5 +21,4 @@ export const useMotoCartStore = create<MotoCartStore>((set, get) => ({
   })),
   clear: () => set({ items: [] }),
   total: () => get().items.reduce((s, i) => s + i.precio_unitario, 0),
-  ganancia: () => get().items.reduce((s, i) => s + (i.precio_unitario - i.costo_unitario), 0),
 }))
