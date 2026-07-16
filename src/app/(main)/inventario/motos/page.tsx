@@ -15,7 +15,7 @@ export default async function MotosPage() {
   const isAdmin = esAdmin(perfil?.rol)
 
   const [{ data: motos }, { data: config }] = await Promise.all([
-    supabase.from('motos').select('*').eq('activo', true).order('marca'),
+    supabase.from('motos').select('*').eq('activo', true).gt('stock', 0).order('marca'),
     supabase.from('configuracion').select('nombre_negocio, direccion, telefono').eq('id', 1).single(),
   ])
 
