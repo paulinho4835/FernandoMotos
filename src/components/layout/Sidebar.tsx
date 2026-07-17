@@ -14,11 +14,12 @@ interface Props {
   isAdmin: boolean
   isSuperAdmin: boolean
   moduloCompradoresActivo: boolean
+  moduloPedidosActivo: boolean
   signOut: () => Promise<void>
   pedidosPendientes?: number
 }
 
-export function Sidebar({ nombre, rol, isAdmin, isSuperAdmin, moduloCompradoresActivo, signOut, pedidosPendientes }: Props) {
+export function Sidebar({ nombre, rol, isAdmin, isSuperAdmin, moduloCompradoresActivo, moduloPedidosActivo, signOut, pedidosPendientes }: Props) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -27,7 +28,9 @@ export function Sidebar({ nombre, rol, isAdmin, isSuperAdmin, moduloCompradoresA
     { href: '/inventario/motos', label: 'Motos', icon: Bike },
     { href: '/historial', label: 'Ventas', icon: History },
     { href: '/clientes', label: 'Clientes', icon: Users },
-    { href: '/pedidos', label: 'Pedidos', icon: ClipboardList },
+    ...(moduloPedidosActivo ? [
+      { href: '/pedidos', label: 'Pedidos', icon: ClipboardList },
+    ] : []),
     ...(isAdmin && moduloCompradoresActivo ? [
       { href: '/compradores', label: 'Compradores', icon: Contact },
     ] : []),

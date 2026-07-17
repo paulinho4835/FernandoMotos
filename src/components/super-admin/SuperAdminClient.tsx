@@ -12,24 +12,25 @@ function formatUltimoBackup(iso: string | null): string {
   return `hace ${dias} días`
 }
 
-export function SuperAdminClient({
-  moduloInicial,
-  ultimoBackupInicial = null,
+type CampoModulo = 'modulo_compradores_activo' | 'modulo_pedidos_activo' | 'modulo_agente_wa_visible'
+
+function ModuloToggle({
+  campo, titulo, descripcion, activoInicial,
 }: {
-  moduloInicial: boolean
-  ultimoBackupInicial?: string | null
+  campo: CampoModulo
+  titulo: string
+  descripcion: string
+  activoInicial: boolean
 }) {
-  const [activo, setActivo] = useState(moduloInicial)
+  const [activo, setActivo] = useState(activoInicial)
   const [saving, setSaving] = useState(false)
-  const [ultimoBackup, setUltimoBackup] = useState(ultimoBackupInicial)
-  const [descargando, setDescargando] = useState(false)
 
   async function toggle() {
     setSaving(true)
     const supabase = createClient()
     const { data, error } = await supabase
       .from('configuracion')
-      .update({ modulo_compradores_activo: !activo, updated_at: new Date().toISOString() })
+      .update({ [campo]: !activo, updated_at: new Date().toISOString() })
       .eq('id', 1)
       .select('id')
     if (error) toast.error(error.message)
@@ -37,6 +38,33 @@ export function SuperAdminClient({
     else { setActivo(!activo); toast.success(!activo ? 'Módulo activado' : 'Módulo desactivado') }
     setSaving(false)
   }
+
+  return (
+    <div className="flex items-center justify-between border-t pt-4">
+      <div>
+        <p className="font-medium">{titulo}</p>
+        <p className="text-sm text-slate-500">{descripcion}</p>
+      </div>
+      <Button variant={activo ? 'default' : 'outline'} disabled={saving} onClick={toggle}>
+        {activo ? 'Activado' : 'Desactivado'}
+      </Button>
+    </div>
+  )
+}
+
+export function SuperAdminClient({
+  moduloInicial,
+  pedidosInicial = true,
+  agenteWaVisibleInicial = true,
+  ultimoBackupInicial = null,
+}: {
+  moduloInicial: boolean
+  pedidosInicial?: boolean
+  agenteWaVisibleInicial?: boolean
+  ultimoBackupInicial?: string | null
+}) {
+  const [ultimoBackup, setUltimoBackup] = useState(ultimoBackupInicial)
+  const [descargando, setDescargando] = useState(false)
 
   async function descargarBackup() {
     setDescargando(true)
@@ -65,15 +93,24 @@ export function SuperAdminClient({
   return (
     <div className="border rounded-lg p-4 space-y-4 bg-white max-w-lg">
       <p className="font-semibold">Módulos</p>
-      <div className="flex items-center justify-between border-t pt-4">
-        <div>
-          <p className="font-medium">Compradores</p>
-          <p className="text-sm text-slate-500">Panel con los compradores del agente, su adelanto y saldo.</p>
-        </div>
-        <Button variant={activo ? 'default' : 'outline'} disabled={saving} onClick={toggle}>
-          {activo ? 'Activado' : 'Desactivado'}
-        </Button>
-      </div>
+      <ModuloToggle
+        campo="modulo_compradores_activo"
+        titulo="Compradores"
+        descripcion="Panel con los compradores del agente, su adelanto y saldo."
+        activoInicial={moduloInicial}
+      />
+      <ModuloToggle
+        campo="modulo_pedidos_activo"
+        titulo="Pedidos"
+        descripcion="Panel con los pedidos pendientes armados por vendedores o el agente."
+        activoInicial={pedidosInicial}
+      />
+      <ModuloToggle
+        campo="modulo_agente_wa_visible"
+        titulo="Agente de WhatsApp"
+        descripcion="Muestra u oculta la sección del agente en Configuración (admin)."
+        activoInicial={agenteWaVisibleInicial}
+      />
 
       <div className="flex items-center justify-between border-t pt-4">
         <div>

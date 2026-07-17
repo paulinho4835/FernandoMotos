@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { PedidosClient } from '@/components/pedidos/PedidosClient'
 
 export default async function PedidosPage() {
@@ -7,6 +8,10 @@ export default async function PedidosPage() {
   const { data: perfil } = user
     ? await supabase.from('perfiles').select('rol, nombre').eq('id', user.id).single()
     : { data: null }
+
+  const { data: config } = await supabase
+    .from('configuracion').select('modulo_pedidos_activo').eq('id', 1).maybeSingle()
+  if (config?.modulo_pedidos_activo === false) redirect('/inventario')
 
   const [{ data: pedidos }, { data: vendedores }] = await Promise.all([
     supabase

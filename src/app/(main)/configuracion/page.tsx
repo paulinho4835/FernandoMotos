@@ -12,7 +12,9 @@ export default async function ConfiguracionPage() {
   if (!esAdmin(perfil?.rol)) redirect('/inventario')
 
   const { data: config } = await supabase
-    .from('configuracion').select('nombre_negocio, direccion, telefono, agente_wa_activo').eq('id', 1).single()
+    .from('configuracion')
+    .select('nombre_negocio, direccion, telefono, agente_wa_activo, modulo_agente_wa_visible')
+    .eq('id', 1).single()
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -22,9 +24,11 @@ export default async function ConfiguracionPage() {
         direccionInicial={config?.direccion ?? ''}
         telefonoInicial={config?.telefono ?? ''}
       />
-      <div className="max-w-lg">
-        <AgenteWAPanel activoInicial={config?.agente_wa_activo ?? false} />
-      </div>
+      {config?.modulo_agente_wa_visible !== false && (
+        <div className="max-w-lg">
+          <AgenteWAPanel activoInicial={config?.agente_wa_activo ?? false} />
+        </div>
+      )}
     </div>
   )
 }

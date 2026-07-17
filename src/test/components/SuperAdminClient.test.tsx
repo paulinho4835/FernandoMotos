@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { SuperAdminClient } from '@/components/super-admin/SuperAdminClient'
 import { toast } from 'sonner'
 
@@ -21,16 +21,22 @@ beforeEach(() => {
   vi.mocked(toast.error).mockClear()
 })
 
+function botonCompradores() {
+  const titulo = screen.getByText('Compradores')
+  const fila = titulo.closest('div')?.parentElement as HTMLElement
+  return within(fila).getByRole('button', { name: /activado|desactivado/i })
+}
+
 describe('SuperAdminClient', () => {
   it('muestra el estado inicial del toggle', () => {
     render(<SuperAdminClient moduloInicial={false} />)
     expect(screen.getByText('Compradores')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /desactivado/i })).toBeInTheDocument()
+    expect(botonCompradores()).toHaveTextContent(/desactivado/i)
   })
 
   it('al hacer click actualiza el flag en configuracion', async () => {
     render(<SuperAdminClient moduloInicial={false} />)
-    fireEvent.click(screen.getByRole('button', { name: /desactivado/i }))
+    fireEvent.click(botonCompradores())
     await waitFor(() => expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ modulo_compradores_activo: true }),
     ))
@@ -39,13 +45,19 @@ describe('SuperAdminClient', () => {
   it('muestra error y NO activa cuando la escritura afecta 0 filas (RLS bloquea)', async () => {
     select.mockReturnValueOnce({ data: [], error: null })
     render(<SuperAdminClient moduloInicial={false} />)
-    fireEvent.click(screen.getByRole('button', { name: /desactivado/i }))
+    fireEvent.click(botonCompradores())
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith(
         'No se pudo guardar: sin permiso para modificar la configuración.'
       )
     )
     expect(toast.success).not.toHaveBeenCalled()
-    expect(screen.getByRole('button', { name: /desactivado/i })).toBeInTheDocument()
+    expect(botonCompradores()).toHaveTextContent(/desactivado/i)
+  })
+
+  it('muestra los toggles de Pedidos y Agente de WhatsApp', () => {
+    render(<SuperAdminClient moduloInicial={false} />)
+    expect(screen.getByText('Pedidos')).toBeInTheDocument()
+    expect(screen.getByText('Agente de WhatsApp')).toBeInTheDocument()
   })
 })

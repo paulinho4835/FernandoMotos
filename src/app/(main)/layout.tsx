@@ -19,10 +19,11 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
   const { data: config } = await supabase
     .from('configuracion')
-    .select('modulo_compradores_activo')
+    .select('modulo_compradores_activo, modulo_pedidos_activo')
     .eq('id', 1)
     .maybeSingle()
   const moduloCompradoresActivo = config?.modulo_compradores_activo === true
+  const moduloPedidosActivo = config?.modulo_pedidos_activo !== false
 
   const { count: pedidosPendientes } = await supabase
     .from('pedidos')
@@ -44,6 +45,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
         isAdmin={isAdmin}
         isSuperAdmin={isSuperAdmin}
         moduloCompradoresActivo={moduloCompradoresActivo}
+        moduloPedidosActivo={moduloPedidosActivo}
         signOut={signOut}
         pedidosPendientes={pedidosPendientes ?? 0}
       />
