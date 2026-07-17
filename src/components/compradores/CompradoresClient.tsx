@@ -20,10 +20,12 @@ export interface Comprador {
 }
 
 const ESTADOS = ['todos', 'pendiente', 'confirmado', 'cancelado'] as const
+const ADELANTOS = ['todos', 'con_adelanto', 'sin_adelanto'] as const
 
 export function CompradoresClient({ pedidos }: { pedidos: Comprador[] }) {
   const [lista, setLista] = useState<Comprador[]>(pedidos)
   const [filtroEstado, setFiltroEstado] = useState<string>('todos')
+  const [filtroAdelanto, setFiltroAdelanto] = useState<string>('todos')
   const [busqueda, setBusqueda] = useState('')
   const [editId, setEditId] = useState<string | null>(null)
   const [editValor, setEditValor] = useState('')
@@ -34,10 +36,12 @@ export function CompradoresClient({ pedidos }: { pedidos: Comprador[] }) {
     const t = busqueda.trim().toLowerCase()
     return lista.filter(p => {
       if (filtroEstado !== 'todos' && p.estado !== filtroEstado) return false
+      if (filtroAdelanto === 'con_adelanto' && p.adelanto <= 0) return false
+      if (filtroAdelanto === 'sin_adelanto' && p.adelanto > 0) return false
       if (t && !p.cliente_nombre.toLowerCase().includes(t) && !p.cliente_telefono.includes(t)) return false
       return true
     })
-  }, [lista, filtroEstado, busqueda])
+  }, [lista, filtroEstado, filtroAdelanto, busqueda])
 
   async function guardar(p: Comprador) {
     const monto = Number(editValor)
@@ -64,6 +68,18 @@ export function CompradoresClient({ pedidos }: { pedidos: Comprador[] }) {
             onChange={e => setFiltroEstado(e.target.value)}
             className="border rounded-md px-2 py-1 text-sm bg-white">
             {ESTADOS.map(e => <option key={e} value={e}>{e}</option>)}
+          </select>
+        </label>
+        <label className="text-sm text-slate-600 flex items-center gap-1">
+          Adelanto:
+          <select aria-label="Filtrar por adelanto" value={filtroAdelanto}
+            onChange={e => setFiltroAdelanto(e.target.value)}
+            className="border rounded-md px-2 py-1 text-sm bg-white">
+            {ADELANTOS.map(a => (
+              <option key={a} value={a}>
+                {a === 'todos' ? 'todos' : a === 'con_adelanto' ? 'con adelanto' : 'sin adelanto'}
+              </option>
+            ))}
           </select>
         </label>
         <input aria-label="Buscar" placeholder="Buscar por nombre o teléfono"
@@ -111,8 +127,17 @@ export function CompradoresClient({ pedidos }: { pedidos: Comprador[] }) {
                         <Button size="sm" variant="ghost" onClick={() => setEditId(null)}>×</Button>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span>{formatBOB(p.adelanto)}</span>
+                        {p.adelanto > 0 ? (
+                          <span className="text-xs px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">
+                            Pagó adelanto
+                          </span>
+                        ) : (
+                          <span className="text-xs px-1.5 py-0.5 rounded-full bg-red-100 text-red-700">
+                            Sin adelanto
+                          </span>
+                        )}
                         <button aria-label="Editar adelanto" className="text-xs text-blue-600"
                           onClick={() => { setEditId(p.id); setEditValor(String(p.adelanto)) }}>
                           editar
