@@ -1,6 +1,5 @@
 'use client'
 import { useRef, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Label } from '@/components/ui/label'
 import { ImagePlus, X, Loader2 } from 'lucide-react'
 
@@ -8,13 +7,6 @@ interface Props {
   motoId: string
   fotos: string[]
   onChange: (fotos: string[]) => void
-}
-
-function pathFromUrl(url: string): string | null {
-  const marker = '/object/public/motos/'
-  const idx = url.indexOf(marker)
-  if (idx === -1) return null
-  return url.slice(idx + marker.length)
 }
 
 export function MotoFotos({ motoId, fotos, onChange }: Props) {
@@ -27,31 +19,22 @@ export function MotoFotos({ motoId, fotos, onChange }: Props) {
     if (!files || files.length === 0) return
     setUploading(true)
     setError('')
-    const supabase = createClient()
-    const nuevas: string[] = []
 
-    for (const file of Array.from(files)) {
-      const path = `${motoId}/${crypto.randomUUID()}-${file.name}`
-      const { error: uploadErr } = await supabase.storage.from('motos').upload(path, file)
-      if (uploadErr) {
-        setError(`Error al subir ${file.name}: ${uploadErr.message}`)
-        continue
-      }
-      const { data } = supabase.storage.from('motos').getPublicUrl(path)
-      nuevas.push(data.publicUrl)
-    }
+    const formData = new FormData()
+    formData.set('motoId', motoId)
+    for (const file of Array.from(files)) formData.append('file', file)
 
-    if (nuevas.length > 0) {
-      const actualizadas = [...fotos, ...nuevas]
-      const { error: updateErr } = await supabase
-        .from('motos')
-        .update({ fotos: actualizadas, updated_at: new Date().toISOString() })
-        .eq('id', motoId)
-      if (updateErr) {
-        setError(`Las fotos se subieron pero no se guardó la referencia: ${updateErr.message}`)
+    try {
+      const res = await fetch('/api/motos/fotos', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? 'Error al subir las fotos')
       } else {
-        onChange(actualizadas)
+        if (data.errors) setError(data.errors.join('; '))
+        if (data.urls?.length > 0) onChange([...fotos, ...data.urls])
       }
+    } catch {
+      setError('Error de red al subir las fotos')
     }
 
     setUploading(false)
@@ -62,20 +45,20 @@ export function MotoFotos({ motoId, fotos, onChange }: Props) {
     if (!confirm('¿Eliminar esta foto?')) return
     setDeletingUrl(url)
     setError('')
-    const supabase = createClient()
-    const path = pathFromUrl(url)
-    if (path) {
-      await supabase.storage.from('motos').remove([path])
-    }
-    const actualizadas = fotos.filter(f => f !== url)
-    const { error: updateErr } = await supabase
-      .from('motos')
-      .update({ fotos: actualizadas, updated_at: new Date().toISOString() })
-      .eq('id', motoId)
-    if (updateErr) {
-      setError(`No se pudo eliminar: ${updateErr.message}`)
-    } else {
-      onChange(actualizadas)
+    try {
+      const res = await fetch('/api/motos/fotos', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? 'No se pudo eliminar')
+      } else {
+        onChange(fotos.filter(f => f !== url))
+      }
+    } catch {
+      setError('Error de red al eliminar la foto')
     }
     setDeletingUrl(null)
   }
