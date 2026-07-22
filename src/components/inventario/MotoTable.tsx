@@ -47,6 +47,7 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad,
             <th className="text-left p-3">Chasis</th>
             <th className="text-left p-3">Motor</th>
             <th className="text-left p-3">Ubicación</th>
+            {isAdmin && <th className="text-left p-3">Proveedor</th>}
             {isAdmin && <th className="text-left p-3">Precio de Compra</th>}
             <th className="text-left p-3">Precio de Venta</th>
             <th className="p-3" />
@@ -77,6 +78,7 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad,
               <td className="p-3 font-mono text-xs">{m.numero_chasis ?? '—'}</td>
               <td className="p-3 font-mono text-xs">{m.numero_motor ?? '—'}</td>
               <td className="p-3">{m.ubicacion ?? '—'}</td>
+              {isAdmin && <td className="p-3">{m.proveedor ?? '—'}</td>}
               {isAdmin && (
                 <td className="p-3 text-amber-700 font-medium">{formatBOB(costos?.[m.id] ?? 0)}</td>
               )}
@@ -103,7 +105,7 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad,
             </tr>
           ))}
           {motos.length === 0 && (
-            <tr><td colSpan={isAdmin ? 11 : 10} className="p-6 text-center text-slate-400">Sin motos</td></tr>
+            <tr><td colSpan={isAdmin ? 12 : 10} className="p-6 text-center text-slate-400">Sin motos</td></tr>
           )}
         </tbody>
       </table>

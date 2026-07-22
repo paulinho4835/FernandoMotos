@@ -19,6 +19,7 @@ export interface MotoFormValues {
   numero_motor: string
   motor_cc: string
   ubicacion: string
+  proveedor: string
   costo: string
   precio_venta: string
 }
@@ -37,6 +38,7 @@ export function buildMotoPayload(form: MotoFormValues): { motoData: Record<strin
     numero_chasis: form.numero_chasis,
     precio_venta: parseFloat(form.precio_venta),
     ubicacion: form.ubicacion || null,
+    proveedor: form.proveedor || null,
     descripcion: null,
   }
   return { motoData, costo: parseFloat(form.costo) }
@@ -57,6 +59,7 @@ export function MotoForm({ moto, costoInicial }: Props) {
     numero_motor: moto?.numero_motor ?? '',
     motor_cc: moto?.motor_cc?.toString() ?? '',
     ubicacion: moto?.ubicacion ?? '',
+    proveedor: moto?.proveedor ?? '',
     costo: costoInicial?.toString() ?? '',
     precio_venta: moto?.precio_venta?.toString() ?? '',
   })
@@ -101,6 +104,7 @@ export function MotoForm({ moto, costoInicial }: Props) {
     { label: 'Nº Motor', field: 'numero_motor', type: 'text' },
     { label: 'Cilindrada (cc)', field: 'motor_cc', type: 'number' },
     { label: 'Ubicación', field: 'ubicacion', type: 'text' },
+    { label: 'Proveedor', field: 'proveedor', type: 'text' },
     { label: 'Precio de Compra (Bs.)', field: 'costo', type: 'number', required: true },
     { label: 'Precio de Venta (Bs.)', field: 'precio_venta', type: 'number', required: true },
   ]

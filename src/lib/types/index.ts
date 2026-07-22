@@ -70,6 +70,7 @@ export interface Moto {
   stock_minimo: number
   descripcion: string | null
   ubicacion?: string | null
+  proveedor?: string | null
   fotos: string[]
   activo: boolean
   created_at: string
