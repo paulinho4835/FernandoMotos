@@ -36,21 +36,21 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad,
 
   return (
     <div className="rounded-md border overflow-x-auto">
-      <table className="w-full min-w-[820px] text-sm">
+      <table className="w-full min-w-[820px] text-sm table-fixed">
         <thead className="bg-slate-50 text-slate-600">
           <tr>
             <th className="p-3 w-14" />
-            <th className="text-left p-3">Tipo/CC</th>
-            <th className="text-left p-3">Marca</th>
-            <th className="text-left p-3">Color</th>
-            <th className="text-left p-3">Año</th>
-            <th className="text-left p-3">Chasis</th>
-            <th className="text-left p-3">Motor</th>
-            <th className="text-left p-3">Ubicación</th>
-            {isAdmin && <th className="text-left p-3">Proveedor</th>}
-            {isAdmin && <th className="text-left p-3">Precio de Compra</th>}
-            <th className="text-left p-3">Precio de Venta</th>
-            <th className="p-3" />
+            <th className="text-left p-3 whitespace-nowrap">Tipo/CC</th>
+            <th className="text-left p-3 whitespace-nowrap">Marca</th>
+            <th className="text-left p-3 whitespace-nowrap">Color</th>
+            <th className="text-left p-3 w-20 whitespace-nowrap">Año</th>
+            <th className="text-left p-3 whitespace-nowrap">Chasis</th>
+            <th className="text-left p-3 whitespace-nowrap">Motor</th>
+            <th className="text-left p-3 whitespace-nowrap">Ubicación</th>
+            {isAdmin && <th className="text-left p-3 whitespace-nowrap">Proveedor</th>}
+            {isAdmin && <th className="text-left p-3 whitespace-nowrap">Precio de Compra</th>}
+            <th className="text-left p-3 whitespace-nowrap">Precio de Venta</th>
+            <th className="p-3 w-24" />
           </tr>
         </thead>
         <tbody>
@@ -75,8 +75,8 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad,
               <td className="p-3">{m.marca}</td>
               <td className="p-3">{m.color ?? '—'}</td>
               <td className="p-3">{m.anio ?? '—'}</td>
-              <td className="p-3 font-mono text-xs">{m.numero_chasis ?? '—'}</td>
-              <td className="p-3 font-mono text-xs">{m.numero_motor ?? '—'}</td>
+              <td className="p-3 font-mono text-xs whitespace-nowrap overflow-hidden text-ellipsis">{m.numero_chasis ?? '—'}</td>
+              <td className="p-3 font-mono text-xs whitespace-nowrap overflow-hidden text-ellipsis">{m.numero_motor ?? '—'}</td>
               <td className="p-3">{m.ubicacion ?? '—'}</td>
               {isAdmin && <td className="p-3">{m.proveedor ?? '—'}</td>}
               {isAdmin && (
