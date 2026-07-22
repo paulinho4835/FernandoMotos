@@ -2,6 +2,8 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client
 import { createClient } from '@/lib/supabase/server'
 import { esAdmin } from '@/lib/auth/roles'
 
+const MAX_FOTOS = 3
+
 function r2Client() {
   return new S3Client({
     region: 'auto',
@@ -41,10 +43,19 @@ export async function POST(req: Request) {
   if (typeof motoId !== 'string' || !motoId) {
     return Response.json({ error: 'Falta motoId' }, { status: 400 })
   }
-  const files = formData.getAll('file').filter((f): f is File => f instanceof File)
+  let files = formData.getAll('file').filter((f): f is File => f instanceof File)
   if (files.length === 0) {
     return Response.json({ error: 'No se recibió ningún archivo' }, { status: 400 })
   }
+
+  const supabase = await createClient()
+  const { data: moto } = await supabase.from('motos').select('fotos').eq('id', motoId).single()
+  const fotosActuales = moto?.fotos ?? []
+  const espacioDisponible = MAX_FOTOS - fotosActuales.length
+  if (espacioDisponible <= 0) {
+    return Response.json({ error: `La moto ya tiene el máximo de ${MAX_FOTOS} fotos` }, { status: 400 })
+  }
+  files = files.slice(0, espacioDisponible)
 
   const client = r2Client()
   const bucket = process.env.R2_BUCKET_NAME!

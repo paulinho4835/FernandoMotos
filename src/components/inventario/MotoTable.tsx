@@ -1,4 +1,5 @@
 'use client'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { Moto } from '@/lib/types'
@@ -6,7 +7,8 @@ import { formatBOB } from '@/lib/utils/formatCurrency'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Edit, ShoppingCart, Bike, Trash2 } from 'lucide-react'
+import { Edit, ShoppingCart, Bike, Trash2, Images } from 'lucide-react'
+import { FotosLightbox } from './FotosLightbox'
 
 interface Props {
   motos: Moto[]
@@ -18,6 +20,7 @@ interface Props {
 
 export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad, costos }: Props) {
   const router = useRouter()
+  const [motoFotos, setMotoFotos] = useState<Moto | null>(null)
 
   async function handleDelete(m: Moto) {
     if (!confirm(`¿Eliminar "${m.marca} ${m.modelo}" (chasis: ${m.numero_chasis ?? 's/n'})? Esta acción no se puede deshacer.`)) return
@@ -85,6 +88,11 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad,
               <td className="p-3">{formatBOB(m.precio_venta)}</td>
               <td className="p-3">
                 <div className="flex items-center gap-1">
+                  {(m.fotos?.length ?? 0) > 0 && (
+                    <Button size="sm" variant="ghost" title="Ver fotos" onClick={() => setMotoFotos(m)}>
+                      <Images size={14} className="text-blue-600" />
+                    </Button>
+                  )}
                   {onAddToCart && (
                     <Button size="sm" variant="ghost" title="Vender moto" onClick={() => onAddToCart(m)}>
                       <ShoppingCart size={14} className="text-green-600" />
@@ -109,6 +117,13 @@ export function MotoTable({ motos, isAdmin = false, onAddToCart, disponibilidad,
           )}
         </tbody>
       </table>
+      {motoFotos && (
+        <FotosLightbox
+          titulo={`${motoFotos.marca} ${motoFotos.modelo}`}
+          fotos={motoFotos.fotos}
+          onClose={() => setMotoFotos(null)}
+        />
+      )}
     </div>
   )
 }

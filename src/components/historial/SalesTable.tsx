@@ -20,7 +20,7 @@ function detalleText(v: Venta): string {
     if (d.productos?.nombre) parts.push(`${d.cantidad}× ${d.productos.nombre}`)
   }
   for (const d of v.detalle_ventas_motos ?? []) {
-    if (d.motos) parts.push(`${d.cantidad}× ${d.motos.marca} ${d.motos.modelo}`)
+    if (d.marca) parts.push(`${d.cantidad}× ${d.marca} ${d.modelo}`)
   }
   return parts.join(', ')
 }

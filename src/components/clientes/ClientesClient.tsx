@@ -19,7 +19,9 @@ interface DetalleMoto {
   cantidad: number
   precio_unitario: number
   subtotal: number
-  motos: { marca: string; modelo: string; anio: number | null } | null
+  marca: string | null
+  modelo: string | null
+  anio: number | null
 }
 
 interface Venta {
@@ -68,7 +70,7 @@ export function ClientesClient({ clientes }: Props) {
         id, tipo_venta, total, created_at,
         perfiles(nombre),
         detalle_ventas(id, cantidad, precio_unitario, subtotal, productos(codigo, nombre, marca, medida)),
-        detalle_ventas_motos(id, cantidad, precio_unitario, subtotal, motos(marca, modelo, anio))
+        detalle_ventas_motos(id, cantidad, precio_unitario, subtotal, marca, modelo, anio)
       `)
       .eq('cliente_id', c.id)
       .order('created_at', { ascending: false })
@@ -211,7 +213,7 @@ export function ClientesClient({ clientes }: Props) {
                           {v.tipo_venta === 'moto' && v.detalle_ventas_motos.map(d => (
                             <div key={d.id} className="flex justify-between text-xs text-slate-600">
                               <span>
-                                {d.motos ? `${d.motos.marca} ${d.motos.modelo}${d.motos.anio ? ` ${d.motos.anio}` : ''}` : '—'}
+                                {d.marca ? `${d.marca} ${d.modelo}${d.anio ? ` ${d.anio}` : ''}` : '—'}
                               </span>
                               <span className="font-medium shrink-0 ml-2">{formatBOB(d.subtotal)}</span>
                             </div>

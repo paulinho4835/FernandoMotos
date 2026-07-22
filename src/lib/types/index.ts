@@ -94,7 +94,7 @@ export interface Venta {
   clientes?: Pick<Cliente, 'nombre'> | null
   perfiles?: Pick<Perfil, 'nombre' | 'email'> | null
   detalle_ventas?: { cantidad: number; productos: Pick<Producto, 'nombre'> | null }[] | null
-  detalle_ventas_motos?: { cantidad: number; motos: Pick<Moto, 'marca' | 'modelo'> | null }[] | null
+  detalle_ventas_motos?: { cantidad: number; marca: string | null; modelo: string | null }[] | null
 }
 
 export interface DetalleVenta {
@@ -118,7 +118,10 @@ export interface DetalleVentaMoto {
   costo_unitario: number
   subtotal: number
   ganancia_item: number
-  motos?: Pick<Moto, 'marca' | 'modelo' | 'anio' | 'color'> | null
+  marca: string | null
+  modelo: string | null
+  anio: number | null
+  color: string | null
 }
 
 // Cart types

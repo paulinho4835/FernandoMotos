@@ -7,7 +7,7 @@ import { Download, ChevronDown, ChevronUp } from 'lucide-react'
 import { toast } from 'sonner'
 
 type DetalleRepuesto = { cantidad: number; productos: { nombre: string } | null }
-type DetalleMoto = { cantidad: number; motos: { marca: string; modelo: string } | null }
+type DetalleMoto = { cantidad: number; marca: string | null; modelo: string | null }
 type VentaExport = {
   id: string
   created_at: string
@@ -67,7 +67,7 @@ export function ExportarCSV() {
         perfiles(nombre),
         clientes(nombre),
         detalle_ventas(cantidad, productos(nombre)),
-        detalle_ventas_motos(cantidad, motos(marca, modelo))
+        detalle_ventas_motos(cantidad, marca, modelo)
       `)
       .gte('created_at', utcDesde)
       .lt('created_at', utcHastaExcl)
@@ -105,7 +105,7 @@ export function ExportarCSV() {
           .join(' | ')
       } else if (v.tipo_venta === 'moto' && v.detalle_ventas_motos) {
         detalle = v.detalle_ventas_motos
-          .map(d => `${d.cantidad}x ${d.motos?.marca ?? ''} ${d.motos?.modelo ?? ''}`.trim())
+          .map(d => `${d.cantidad}x ${d.marca ?? ''} ${d.modelo ?? ''}`.trim())
           .join(' | ')
       }
 

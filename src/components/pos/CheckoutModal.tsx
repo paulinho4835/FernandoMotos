@@ -7,6 +7,7 @@ import { useMotoCartStore } from '@/lib/store/motoCartStore'
 import type { TipoVenta, Vendedor } from '@/lib/types'
 import { formatBOB } from '@/lib/utils/formatCurrency'
 import { generateAndOpenPDF } from './ReceiptPDF'
+import { borrarFotosR2 } from '@/lib/utils/borrarFotosR2'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from '@/components/ui/dialog'
@@ -170,13 +171,25 @@ export function CheckoutModal({ open, onClose, mode, vendedorNombre, isAdmin, ne
             })),
           }
 
-    const rpc = mode === 'repuesto' ? 'crear_venta_repuesto' : 'crear_venta_moto'
-    const { data: ventaId, error } = await supabase.rpc(rpc, { payload })
-
-    if (error) {
-      toast.error(`Error: ${error.message}`)
-      setLoading(false)
-      return
+    let ventaId: string
+    if (mode === 'repuesto') {
+      const { data, error } = await supabase.rpc('crear_venta_repuesto', { payload })
+      if (error) {
+        toast.error(`Error: ${error.message}`)
+        setLoading(false)
+        return
+      }
+      ventaId = data as string
+    } else {
+      const { data, error } = await supabase.rpc('crear_venta_moto', { payload })
+      if (error) {
+        toast.error(`Error: ${error.message}`)
+        setLoading(false)
+        return
+      }
+      const result = data as { venta_id: string; fotos_a_borrar: string[] }
+      ventaId = result.venta_id
+      borrarFotosR2(result.fotos_a_borrar)
     }
 
     await generateAndOpenPDF({

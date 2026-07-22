@@ -8,6 +8,11 @@ function file(name: string) {
 
 beforeEach(() => {
   vi.stubGlobal('confirm', vi.fn(() => true))
+  // jsdom no decodifica imágenes reales ni tiene canvas 2d: simulamos un
+  // createImageBitmap exitoso para que compressImage tome el camino rápido
+  // (el dibujo en canvas fallará igual por falta de ctx 2d y caerá al
+  // archivo original) en vez de colgarse esperando el respaldo <img>.
+  vi.stubGlobal('createImageBitmap', vi.fn().mockResolvedValue({ width: 100, height: 100 }))
 })
 
 describe('MotoFotos', () => {

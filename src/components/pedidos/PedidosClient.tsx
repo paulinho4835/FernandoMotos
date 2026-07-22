@@ -7,6 +7,7 @@ import { formatBOB } from '@/lib/utils/formatCurrency'
 import { toast, Toaster } from 'sonner'
 import { Check, X, Phone } from 'lucide-react'
 import type { Vendedor } from '@/lib/types'
+import { borrarFotosR2 } from '@/lib/utils/borrarFotosR2'
 
 interface Pedido {
   id: string
@@ -46,7 +47,7 @@ export function PedidosClient({ pedidos: inicial, vendedores, vendedorNombre }: 
 
     // 2) Crear la venta real (descuenta stock) reusando el RPC existente.
     const nombreVendedor = vendedores.find(v => v.id === vendedorSel)?.nombre ?? vendedorNombre
-    const { data: ventaId, error } = await supabase.rpc('crear_venta_moto', {
+    const { data, error } = await supabase.rpc('crear_venta_moto', {
       payload: {
         cliente_id: clienteId,
         vendedor_nombre: nombreVendedor,
@@ -55,6 +56,9 @@ export function PedidosClient({ pedidos: inicial, vendedores, vendedorNombre }: 
       },
     })
     if (error) { toast.error(`Error al crear la venta: ${error.message}`); setBusyId(null); return }
+    const result = data as { venta_id: string; fotos_a_borrar: string[] }
+    const ventaId = result.venta_id
+    borrarFotosR2(result.fotos_a_borrar)
 
     // 3) Marcar el pedido como confirmado.
     await supabase.from('pedidos').update({ estado: 'confirmado', cliente_id: clienteId, venta_id: ventaId, updated_at: new Date().toISOString() }).eq('id', p.id)
