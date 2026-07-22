@@ -60,4 +60,9 @@ describe('SuperAdminClient', () => {
     expect(screen.getByText('Pedidos')).toBeInTheDocument()
     expect(screen.getByText('Agente de WhatsApp')).toBeInTheDocument()
   })
+
+  it('muestra el toggle de Fotos de motos', () => {
+    render(<SuperAdminClient moduloInicial={false} />)
+    expect(screen.getByText('Fotos de motos')).toBeInTheDocument()
+  })
 })

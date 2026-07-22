@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { MotoFotos } from './MotoFotos'
 
-interface Props { moto?: Moto; costoInicial?: number }
+interface Props { moto?: Moto; costoInicial?: number; fotosActivo?: boolean }
 
 export interface MotoFormValues {
   marca: string
@@ -44,7 +44,7 @@ export function buildMotoPayload(form: MotoFormValues): { motoData: Record<strin
   return { motoData, costo: parseFloat(form.costo) }
 }
 
-export function MotoForm({ moto, costoInicial }: Props) {
+export function MotoForm({ moto, costoInicial, fotosActivo = false }: Props) {
   const router = useRouter()
   const isEdit = Boolean(moto)
   const [loading, setLoading] = useState(false)
@@ -119,10 +119,12 @@ export function MotoForm({ moto, costoInicial }: Props) {
             step={type === 'number' ? '1' : undefined} />
         </div>
       ))}
-      {isEdit ? (
-        <MotoFotos motoId={moto!.id} fotos={fotos} onChange={setFotos} />
-      ) : (
-        <p className="text-xs text-slate-500">Guarda la moto para poder agregar fotos.</p>
+      {fotosActivo && (
+        isEdit ? (
+          <MotoFotos motoId={moto!.id} fotos={fotos} onChange={setFotos} />
+        ) : (
+          <p className="text-xs text-slate-500">Guarda la moto para poder agregar fotos.</p>
+        )
       )}
       {error && <p className="text-sm text-red-500">{error}</p>}
       <div className="flex gap-2">

@@ -12,7 +12,11 @@ function formatUltimoBackup(iso: string | null): string {
   return `hace ${dias} días`
 }
 
-type CampoModulo = 'modulo_compradores_activo' | 'modulo_pedidos_activo' | 'modulo_agente_wa_visible'
+type CampoModulo =
+  | 'modulo_compradores_activo'
+  | 'modulo_pedidos_activo'
+  | 'modulo_agente_wa_visible'
+  | 'modulo_fotos_motos_activo'
 
 function ModuloToggle({
   campo, titulo, descripcion, activoInicial,
@@ -56,11 +60,13 @@ export function SuperAdminClient({
   moduloInicial,
   pedidosInicial = true,
   agenteWaVisibleInicial = true,
+  fotosMotosInicial = false,
   ultimoBackupInicial = null,
 }: {
   moduloInicial: boolean
   pedidosInicial?: boolean
   agenteWaVisibleInicial?: boolean
+  fotosMotosInicial?: boolean
   ultimoBackupInicial?: string | null
 }) {
   const [ultimoBackup, setUltimoBackup] = useState(ultimoBackupInicial)
@@ -110,6 +116,12 @@ export function SuperAdminClient({
         titulo="Agente de WhatsApp"
         descripcion="Muestra u oculta la sección del agente en Configuración (admin)."
         activoInicial={agenteWaVisibleInicial}
+      />
+      <ModuloToggle
+        campo="modulo_fotos_motos_activo"
+        titulo="Fotos de motos"
+        descripcion="Permite subir fotos de motos (se guardan en Cloudflare R2)."
+        activoInicial={fotosMotosInicial}
       />
 
       <div className="flex items-center justify-between border-t pt-4">

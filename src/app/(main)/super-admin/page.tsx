@@ -12,7 +12,7 @@ export default async function SuperAdminPage() {
 
   const { data: config } = await supabase
     .from('configuracion')
-    .select('modulo_compradores_activo, modulo_pedidos_activo, modulo_agente_wa_visible, ultimo_backup_at')
+    .select('modulo_compradores_activo, modulo_pedidos_activo, modulo_agente_wa_visible, modulo_fotos_motos_activo, ultimo_backup_at')
     .eq('id', 1).maybeSingle()
 
   return (
@@ -22,6 +22,7 @@ export default async function SuperAdminPage() {
         moduloInicial={config?.modulo_compradores_activo ?? false}
         pedidosInicial={config?.modulo_pedidos_activo ?? true}
         agenteWaVisibleInicial={config?.modulo_agente_wa_visible ?? true}
+        fotosMotosInicial={config?.modulo_fotos_motos_activo ?? false}
         ultimoBackupInicial={config?.ultimo_backup_at ?? null}
       />
     </div>
