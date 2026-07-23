@@ -1,16 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
+import { getPerfil, getConfiguracion } from '@/lib/supabase/session'
 import { redirect } from 'next/navigation'
 import { PedidosClient } from '@/components/pedidos/PedidosClient'
 
 export default async function PedidosPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  const { data: perfil } = user
-    ? await supabase.from('perfiles').select('rol, nombre').eq('id', user.id).single()
-    : { data: null }
+  const perfil = await getPerfil()
 
-  const { data: config } = await supabase
-    .from('configuracion').select('modulo_pedidos_activo').eq('id', 1).maybeSingle()
+  const config = await getConfiguracion()
   if (config?.modulo_pedidos_activo === false) redirect('/inventario')
 
   const [{ data: pedidos }, { data: vendedores }] = await Promise.all([

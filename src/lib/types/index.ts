@@ -26,6 +26,19 @@ export interface Perfil {
   created_at: string
 }
 
+export interface Configuracion {
+  id: number
+  nombre_negocio: string | null
+  direccion: string | null
+  telefono: string | null
+  modulo_compradores_activo: boolean | null
+  modulo_pedidos_activo: boolean | null
+  modulo_fotos_motos_activo: boolean | null
+  modulo_agente_wa_visible: boolean | null
+  agente_wa_activo: boolean | null
+  ultimo_backup_at: string | null
+}
+
 export interface Cliente {
   id: string
   nombre: string

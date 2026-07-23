@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getAuthUser, getPerfil, getConfiguracion } from '@/lib/supabase/session'
 import { MotosClient } from '@/components/inventario/MotosClient'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -7,16 +8,14 @@ import { esAdmin } from '@/lib/auth/roles'
 
 export default async function MotosPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  const { data: perfil } = user
-    ? await supabase.from('perfiles').select('rol, nombre').eq('id', user.id).single()
-    : { data: null }
+  const user = await getAuthUser()
+  const perfil = await getPerfil()
 
   const isAdmin = esAdmin(perfil?.rol)
 
-  const [{ data: motos }, { data: config }] = await Promise.all([
+  const [{ data: motos }, config] = await Promise.all([
     supabase.from('motos').select('*').eq('activo', true).gt('stock', 0).order('marca'),
-    supabase.from('configuracion').select('nombre_negocio, direccion, telefono').eq('id', 1).single(),
+    getConfiguracion(),
   ])
 
   const { data: disp } = await supabase

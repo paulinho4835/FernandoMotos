@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
+import { getAuthUser } from '@/lib/supabase/session'
 import { redirect } from 'next/navigation'
 import { CategoriasClient } from '@/components/inventario/CategoriasClient'
 
 export default async function CategoriasPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) redirect('/login')
 
   const { data: categorias } = await supabase

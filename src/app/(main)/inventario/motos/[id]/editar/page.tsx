@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getAuthUser, getPerfil, getConfiguracion } from '@/lib/supabase/session'
 import { redirect, notFound } from 'next/navigation'
 import { MotoForm } from '@/components/inventario/MotoForm'
 import { esAdmin } from '@/lib/auth/roles'
@@ -6,16 +7,16 @@ import { esAdmin } from '@/lib/auth/roles'
 export default async function EditarMotoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) redirect('/login')
-  const { data: perfil } = await supabase.from('perfiles').select('rol').eq('id', user.id).single()
+  const perfil = await getPerfil()
   if (!esAdmin(perfil?.rol)) redirect('/inventario/motos')
   const { data: moto } = await supabase.from('motos').select('*').eq('id', id).single()
   if (!moto) notFound()
-  const { data: costoRow } = await supabase
-    .from('motos_costos').select('costo').eq('moto_id', id).maybeSingle()
-  const { data: config } = await supabase
-    .from('configuracion').select('modulo_fotos_motos_activo').eq('id', 1).maybeSingle()
+  const [{ data: costoRow }, config] = await Promise.all([
+    supabase.from('motos_costos').select('costo').eq('moto_id', id).maybeSingle(),
+    getConfiguracion(),
+  ])
 
   return (
     <div className="p-4 md:p-6 space-y-4">

@@ -1,27 +1,20 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getAuthUser, getPerfil, getConfiguracion } from '@/lib/supabase/session'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { esAdmin, esSuperAdmin } from '@/lib/auth/roles'
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) redirect('/login')
 
-  const { data: perfil } = await supabase
-    .from('perfiles')
-    .select('rol, nombre')
-    .eq('id', user.id)
-    .single()
+  const perfil = await getPerfil()
 
   const isAdmin = esAdmin(perfil?.rol)
   const isSuperAdmin = esSuperAdmin(perfil?.rol)
 
-  const { data: config } = await supabase
-    .from('configuracion')
-    .select('modulo_compradores_activo, modulo_pedidos_activo')
-    .eq('id', 1)
-    .maybeSingle()
+  const config = await getConfiguracion()
   const moduloCompradoresActivo = config?.modulo_compradores_activo === true
   const moduloPedidosActivo = config?.modulo_pedidos_activo !== false
 

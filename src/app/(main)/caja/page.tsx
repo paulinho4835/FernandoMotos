@@ -1,16 +1,12 @@
-import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getAuthUser, getPerfil, getConfiguracion } from '@/lib/supabase/session'
 import { CajaClient } from './CajaClient'
 import { esAdmin } from '@/lib/auth/roles'
 
 export default async function CajaPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) redirect('/login')
-  const [{ data: perfil }, { data: config }] = await Promise.all([
-    supabase.from('perfiles').select('nombre, rol').eq('id', user.id).single(),
-    supabase.from('configuracion').select('nombre_negocio, direccion, telefono').eq('id', 1).single(),
-  ])
+  const [perfil, config] = await Promise.all([getPerfil(), getConfiguracion()])
 
   return (
     <CajaClient
