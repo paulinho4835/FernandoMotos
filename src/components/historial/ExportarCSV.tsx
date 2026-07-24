@@ -7,7 +7,7 @@ import { Download, ChevronDown, ChevronUp } from 'lucide-react'
 import { toast } from 'sonner'
 
 type DetalleRepuesto = { cantidad: number; productos: { nombre: string } | null }
-type DetalleMoto = { cantidad: number; marca: string | null; modelo: string | null }
+type DetalleMoto = { cantidad: number; marca: string | null; modelo: string | null; numero_chasis: string | null; numero_motor: string | null; proveedor: string | null }
 type VentaExport = {
   id: string
   created_at: string
@@ -67,7 +67,7 @@ export function ExportarCSV() {
         perfiles(nombre),
         clientes(nombre),
         detalle_ventas(cantidad, productos(nombre)),
-        detalle_ventas_motos(cantidad, marca, modelo)
+        detalle_ventas_motos(cantidad, marca, modelo, numero_chasis, numero_motor, proveedor)
       `)
       .gte('created_at', utcDesde)
       .lt('created_at', utcHastaExcl)
@@ -89,7 +89,7 @@ export function ExportarCSV() {
 
     const headers = [
       'Fecha', 'Hora', 'Tipo', 'Vendedor', 'Cliente',
-      'Detalle', 'Total (Bs.)', 'Ganancia (Bs.)', 'Método pago', 'Estado',
+      'Detalle', 'Chasis', 'Motor', 'Proveedor', 'Total (Bs.)', 'Ganancia (Bs.)', 'Método pago', 'Estado',
     ]
     const rows = ventas.map(v => {
       const dtBOT = new Date(new Date(v.created_at).getTime() - 4 * 60 * 60 * 1000)
@@ -99,6 +99,9 @@ export function ExportarCSV() {
       const cliente = v.clientes?.nombre ?? ''
 
       let detalle = ''
+      let chasis = ''
+      let motor = ''
+      let proveedor = ''
       if (v.tipo_venta === 'repuesto' && v.detalle_ventas) {
         detalle = v.detalle_ventas
           .map(d => `${d.cantidad}x ${d.productos?.nombre ?? ''}`)
@@ -107,9 +110,12 @@ export function ExportarCSV() {
         detalle = v.detalle_ventas_motos
           .map(d => `${d.cantidad}x ${d.marca ?? ''} ${d.modelo ?? ''}`.trim())
           .join(' | ')
+        chasis = v.detalle_ventas_motos.map(d => d.numero_chasis ?? '').join(' | ')
+        motor = v.detalle_ventas_motos.map(d => d.numero_motor ?? '').join(' | ')
+        proveedor = v.detalle_ventas_motos.map(d => d.proveedor ?? '').join(' | ')
       }
 
-      return [fecha, hora, v.tipo_venta, vendedor, cliente, detalle,
+      return [fecha, hora, v.tipo_venta, vendedor, cliente, detalle, chasis, motor, proveedor,
         v.total, v.ganancia_neta, v.metodo_pago, v.estado]
         .map(csvEscape).join(',')
     })

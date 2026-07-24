@@ -14,13 +14,19 @@ interface Props {
   devolviendoId?: string | null
 }
 
-function detalleText(v: Venta): string {
+function detalleText(v: Venta, isAdmin: boolean): string {
   const parts: string[] = []
   for (const d of v.detalle_ventas ?? []) {
     if (d.productos?.nombre) parts.push(`${d.cantidad}× ${d.productos.nombre}`)
   }
   for (const d of v.detalle_ventas_motos ?? []) {
-    if (d.marca) parts.push(`${d.cantidad}× ${d.marca} ${d.modelo}`)
+    if (!d.marca) continue
+    const ref = [
+      d.numero_chasis && `Chasis: ${d.numero_chasis}`,
+      d.numero_motor && `Motor: ${d.numero_motor}`,
+      isAdmin && d.proveedor && `Proveedor: ${d.proveedor}`,
+    ].filter(Boolean).join(', ')
+    parts.push(`${d.cantidad}× ${d.marca} ${d.modelo}${ref ? ` (${ref})` : ''}`)
   }
   return parts.join(', ')
 }
@@ -72,7 +78,7 @@ export function SalesTable({ ventas, title, isAdmin, onDelete, deletingId, onDev
                     {v.estado === 'anulada' && <Badge variant="destructive">Anulada</Badge>}
                   </div>
                 </td>
-                <td className="p-3 max-w-xs text-slate-700">{detalleText(v) || <span className="text-slate-400">—</span>}</td>
+                <td className="p-3 max-w-xs text-slate-700">{detalleText(v, !!isAdmin) || <span className="text-slate-400">—</span>}</td>
                 <td className="p-3">{v.clientes?.nombre ?? <span className="text-slate-400">—</span>}</td>
                 <td className="p-3">{v.vendedor_nombre ?? v.perfiles?.nombre ?? <span className="text-slate-400">—</span>}</td>
                 <td className={`p-3 text-right font-semibold ${inactiva ? 'line-through' : ''}`}>{formatBOB(v.total)}</td>

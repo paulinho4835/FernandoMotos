@@ -10,7 +10,7 @@ export default async function HistorialPage() {
 
   const { data: ventas } = await supabase
     .from('ventas')
-    .select('*, clientes(nombre), perfiles(nombre, email), detalle_ventas(cantidad, productos(nombre)), detalle_ventas_motos(cantidad, marca, modelo)')
+    .select('*, clientes(nombre), perfiles(nombre, email), detalle_ventas(cantidad, productos(nombre)), detalle_ventas_motos(cantidad, marca, modelo, numero_chasis, numero_motor, proveedor)')
     .order('created_at', { ascending: false })
 
   return (

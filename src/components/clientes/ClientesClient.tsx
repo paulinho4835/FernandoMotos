@@ -22,6 +22,8 @@ interface DetalleMoto {
   marca: string | null
   modelo: string | null
   anio: number | null
+  numero_chasis: string | null
+  numero_motor: string | null
 }
 
 interface Venta {
@@ -70,7 +72,7 @@ export function ClientesClient({ clientes }: Props) {
         id, tipo_venta, total, created_at,
         perfiles(nombre),
         detalle_ventas(id, cantidad, precio_unitario, subtotal, productos(codigo, nombre, marca, medida)),
-        detalle_ventas_motos(id, cantidad, precio_unitario, subtotal, marca, modelo, anio)
+        detalle_ventas_motos(id, cantidad, precio_unitario, subtotal, marca, modelo, anio, numero_chasis, numero_motor)
       `)
       .eq('cliente_id', c.id)
       .order('created_at', { ascending: false })
@@ -212,9 +214,15 @@ export function ClientesClient({ clientes }: Props) {
                           ))}
                           {v.tipo_venta === 'moto' && v.detalle_ventas_motos.map(d => (
                             <div key={d.id} className="flex justify-between text-xs text-slate-600">
-                              <span>
-                                {d.marca ? `${d.marca} ${d.modelo}${d.anio ? ` ${d.anio}` : ''}` : '—'}
-                              </span>
+                              <div>
+                                <div>{d.marca ? `${d.marca} ${d.modelo}${d.anio ? ` ${d.anio}` : ''}` : '—'}</div>
+                                {(d.numero_chasis || d.numero_motor) && (
+                                  <div className="text-slate-400">
+                                    {[d.numero_chasis && `Chasis: ${d.numero_chasis}`, d.numero_motor && `Motor: ${d.numero_motor}`]
+                                      .filter(Boolean).join(' · ')}
+                                  </div>
+                                )}
+                              </div>
                               <span className="font-medium shrink-0 ml-2">{formatBOB(d.subtotal)}</span>
                             </div>
                           ))}
